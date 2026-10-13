@@ -84,20 +84,30 @@ ai-gateway-core/
 
 ## Documentation
 
-| Document | Content |
-|---|---|
-| [Architecture](docs/architecture.md) | Layered design / request lifecycle / module responsibilities |
-| [Plugins](docs/plugins.md) | The 6 built-in plugins + how to write your own |
-| [Config reference](docs/config-reference.md) | Every `config.yaml` field |
-| [API contract](docs/api.md) | Response headers / error codes / `gateway_meta` / truncation repair |
-| [Audit log format](docs/audit-log.md) | `uba.json` field schema |
-| [Protocol adaptation](docs/protocols.md) | Baidu token exchange / adding non-standard protocols |
-| [Deployment](docs/deployment.md) | Docker / hot reload / production notes |
-| [Benchmark](docs/benchmark.md) | Measured performance baseline |
-| [Release checklist](docs/release-checklist.md) | Open-source release checklist |
+| Document | Content | 中文 |
+|---|---|---|
+| [Architecture](docs/architecture.en.md) | Layered design / request lifecycle / module responsibilities | [中文](docs/architecture.md) |
+| [Plugins](docs/plugins.en.md) | The 6 built-in plugins + how to write your own | [中文](docs/plugins.md) |
+| [Config reference](docs/config-reference.en.md) | Every `config.yaml` field, type, default and validation rule | [中文](docs/config-reference.md) |
+| [API contract](docs/api.en.md) | Response headers / error codes / `gateway_meta` / truncation repair | [中文](docs/api.md) |
+| [Audit log format](docs/audit-log.md) | `uba.json` field schema (Chinese) | — |
+| [Protocol adaptation](docs/protocols.md) | Baidu token exchange / adding non-standard protocols (Chinese) | — |
+| [Deployment](docs/deployment.md) | Docker / hot reload / production notes (Chinese) | — |
+| [Benchmark](docs/benchmark.md) | Measured performance baseline (Chinese) | — |
+| [Dashboard manual](obs/README.en.md) | Read-only dashboard: audit / call chain / cost / blocked & failover badges | [中文](obs/README.md) |
+| [Release checklist](docs/release-checklist.md) | Open-source release checklist (Chinese) | — |
 
-> Design documents (Chinese): [backlog](docs/backlog.md) · [roadmap](docs/roadmap.md) · [fallback-design](docs/fallback-design.md) · [content-routing](docs/content-routing.md) · [cost-optimization](docs/cost-optimization.md) · [agent-mode](docs/agent-mode.md) · [model-alias](docs/model-alias.md)
-> English translations of the design documents are welcome as contributions.
+**Design documents** (Chinese): [backlog](docs/backlog.md) · [roadmap](docs/roadmap.md) · [fallback-design](docs/fallback-design.md) · [content-routing](docs/content-routing.md) · [cost-optimization](docs/cost-optimization.md) · [agent-mode](docs/agent-mode.md) · [model-alias](docs/model-alias.md)
+English translations of the design documents are welcome as contributions.
+
+### See the dashboard without running a gateway
+
+Sample audit data ships in the repo, so you can open a fully populated dashboard immediately:
+
+```bash
+cd obs && go build -o bin/ai-gateway-obs . && ./bin/ai-gateway-obs -log ../examples/uba.json
+# open http://localhost:9090
+```
 
 ---
 

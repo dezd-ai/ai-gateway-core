@@ -25,6 +25,7 @@ type Record struct {
 	CachedTokens     int64    `json:"cached_tokens"`
 	Precision        string   `json:"precision"`
 	DurationMs       int64    `json:"duration_ms"`
+	AgentMode        bool     `json:"agent_mode"` // agent 宽松模式 key（成本归属）
 	// Fallback 审计（failover 模式，见 docs/fallback-design.md）
 	FallbackChain  []string `json:"fallback_chain"`
 	Attempts       int64    `json:"attempts"`

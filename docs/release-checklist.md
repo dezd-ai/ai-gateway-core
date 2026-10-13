@@ -43,21 +43,20 @@
 | # | 文档 | 状态 |
 |---|---|---|
 | 4.1 | README（状态矩阵 / 目录结构 / 快速开始 / 已知限制 / Roadmap） | ✅ 已更新至当前实现 |
-| 4.2 | docs/ 15 篇（架构/插件/配置/API/审计/协议/部署/基线/各设计稿） | ✅ |
-| 4.3 | SECURITY.md（含安全限制与报告渠道） | ✅ |
-| 4.4 | CONTRIBUTING.md（贡献流程 + 扩展指南） | ✅ |
-| 4.5 | CODE_OF_CONDUCT.md / MAINTAINERS.md / CHANGELOG.md | ✅ |
-| 4.6 | Issue / PR 模板 | ✅ |
-| 4.7 | Dockerfile / docker-compose / Makefile | ✅ |
+| 4.2 | docs/ 20 篇（架构/插件/配置/API/审计/协议/部署/基线/发布清单/设计稿） | ✅ |
+| 4.3 | **中英双语**：README + 核心 4 篇（架构/插件/配置参考/API）+ obs 说明 | ✅ 语言切换互链 |
+| 4.4 | 观测台（obs）定位说明：**只读、非管理端**（网关无 Web 管理端，配置只走 config.yaml） | ✅ 中英 README 均已澄清 |
+| 4.5 | 示例审计数据 `examples/uba.json`（clone 后即可看板，无需运行网关） | ✅ 12 条（正常/拦截/failover/agent） |
+| 4.6 | obs 开源友好：`config.yaml` 缺失时自动回退 `config.example.yaml` | ✅ |
+| 4.7 | SECURITY.md / CONTRIBUTING.md / CODE_OF_CONDUCT.md / MAINTAINERS.md / CHANGELOG.md | ✅ |
+| 4.8 | Issue / PR 模板 · Dockerfile / docker-compose / Makefile | ✅ |
 
-## 5. 发布动作（地址确定后执行）
+## 5. 发布动作
 
 ```bash
-# 1) 替换模块路径（先确认真实地址）
-#    go.mod + 所有 import + 文档引用
-# 2) 初始化仓库
-git init && git add -A && git commit -m "feat: AI-Gateway-Core v0.1.0 首个开源版本"
-# 3) 打 tag（触发 release 工作流，若已配置）
+# 已完成：模块路径替换 + git init + 首次提交 + remote 配置
+# 剩余：推送 + tag（见下方命令）
+git push -u origin main
 git tag -a v0.1.0 -m "v0.1.0: 内核 + 6 插件 + fallback + 治理能力 + 内存防线 + Agent 模式"
 git push origin main --tags
 # 4) 发布说明：直接引用 CHANGELOG 的 v0.1.0 段

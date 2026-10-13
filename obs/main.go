@@ -6,6 +6,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -19,7 +20,16 @@ func main() {
 	configPath := flag.String("config", "../config.yaml", "网关配置文件路径（读取 cost_per_1k）")
 	flag.Parse()
 
-	store := NewStore(*logPath, *configPath)
+	// 开源友好：默认 config.yaml 不存在（gitignore）时回退到 config.example.yaml，
+	// 保证 clone 后即可看到成本列，无需先准备配置。
+	resolvedConfig := *configPath
+	if _, err := os.Stat(resolvedConfig); err != nil && resolvedConfig == "../config.yaml" {
+		if _, err := os.Stat("../config.example.yaml"); err == nil {
+			resolvedConfig = "../config.example.yaml"
+		}
+	}
+
+	store := NewStore(*logPath, resolvedConfig)
 	store.Start(2 * time.Second)
 
 	mux := http.NewServeMux()
@@ -37,7 +47,7 @@ func main() {
 
 	log.Printf("AI-Gateway 观测台已启动: http://localhost%s", *listen)
 	log.Printf("  审计日志: %s", *logPath)
-	log.Printf("  网关配置: %s", *configPath)
+	log.Printf("  网关配置: %s", resolvedConfig)
 	if err := http.ListenAndServe(*listen, mux); err != nil {
 		log.Fatalf("服务启动失败: %v", err)
 	}

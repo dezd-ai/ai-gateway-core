@@ -1,7 +1,10 @@
 # AI-Gateway-Obs 观测台
 
+[English](README.en.md) | **中文**
+
 AI-Gateway-Core 的**只读观测工具**（本仓库 `obs/` 子目录），用本地网页查看网关的审计日志、调用链与成本。
 
+- **不是管理端**：不做配置、不控制网关——纯只读观察者（网关本身无 Web 管理端，配置只走 `config.yaml`）。
 - **零改动 ai-gateway-core**：只读它的 `logs/uba.json` 和 `config.yaml`。
 - **零外部依赖**：纯 Go 标准库，前端单文件 HTML（无任何 CDN）。
 - **纯观察者**：不写网关、不写日志、不反向控制。
@@ -17,6 +20,7 @@ AI-Gateway-Core 的**只读观测工具**（本仓库 `obs/` 子目录），用�
 | 审计表格 | 每条请求的时间/用户/模型/上游/Token/成本/计费精度/安全/**状态**/时延，可按用户/模型/上游筛选 |
 | **拦截标记** | 被网关拦截的请求（401/403/429/413）显示红色「拦截」标签 + 原因码 |
 | **Fallback 标记** | 发生失败转移的请求显示紫色 `↪ 上游A→上游B` 标签（明细见调用链详情） |
+| **Agent 标记** | `agent_mode: true` 的 key 请求在用户列显示蓝色 `agent` 标签（成本归属） |
 | **调用链** | 点击行或「调用链」按钮，弹出垂直时间线：按插件执行顺序展示每步「做了什么 + 产出了什么数据」 |
 | 自动刷新 | 每 3 秒重读日志 |
 
@@ -33,10 +37,16 @@ go build -o bin/ai-gateway-obs .   # 或 go run .
 # 浏览器打开 http://localhost:9090
 ```
 
+**先看效果（无需运行网关）**：仓库内附示例审计数据 `examples/uba.json`，直接指向它即可看到完整看板（含正常/拦截/fallback/agent 各类记录）：
+
+```bash
+./bin/ai-gateway-obs -log ../examples/uba.json
+```
+
 默认读取（相对路径，需在 `obs/` 目录下运行）：
 
 - 审计日志：`../logs/uba.json`
-- 网关配置：`../config.yaml`（取各上游 `cost_per_1k` 算成本）
+- 网关配置：`../config.yaml`（取各上游 `cost_per_1k` 算成本）；**该文件不存在时自动回退 `../config.example.yaml`**，保证 clone 后即可看到成本列。
 
 可用参数覆盖：
 
@@ -50,7 +60,7 @@ go build -o bin/ai-gateway-obs .   # 或 go run .
 
 ```
 ai-gateway-obs/
-├── go.mod            # module ai-gateway-obs
+├── go.mod            # module github.com/DezDing/ai-gateway-core/obs（独立模块）
 ├── main.go           # HTTP 服务 + /api/* 接口 + go:embed 网页
 ├── store.go          # uba.json 读取/过滤/聚合（RWMutex + 2s 周期刷新）
 ├── cost.go           # 从 config.yaml 提取各上游 cost_per_1k

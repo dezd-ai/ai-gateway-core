@@ -75,6 +75,7 @@
   .tag.estimated { background: rgba(230,180,80,.15); color: var(--yellow); }
   .tag.fallback { background: rgba(190,120,255,.15); color: #be78ff; }
   .tag.blocked { background: rgba(229,99,107,.15); color: var(--red); }
+  .tag.agent { background: rgba(90,200,250,.15); color: #5ac8fa; }
 
   .detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 10; }
   .detail-overlay.open { display: flex; align-items: center; justify-content: center; }
@@ -207,7 +208,7 @@ async function loadRecords() {
   body.innerHTML = recs.map(r => `
     <tr data-id="${r.trace_id}">
       <td>${fmtTime(r.timestamp)}</td>
-      <td>${r.username || '-'}</td>
+      <td>${r.username || '-'}${r.agent_mode ? ' <span class="tag agent">agent</span>' : ''}</td>
       <td>${r.department || '-'}</td>
       <td>${r.model || '-'}</td>
       <td>${r.fallback_chain && r.fallback_chain.length > 1 ? '<span class="tag fallback">↪ ' + r.fallback_chain.join('→') + '</span>' : (r.upstream || '-')}</td>

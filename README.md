@@ -75,7 +75,8 @@ ai-gateway-core/
 ├── doctor/doctor.go        # check 子命令（诊断引擎）
 ├── bench/bench.go          # bench 子命令（压测引擎）
 ├── mockup/mockup.go        # 内存 Mock 流式上游 + 故障注入上游（fallback 测试）
-├── obs/                    # 只读观测台（独立 go.mod）
+├── examples/uba.json       # 示例审计数据（供 obs 直接体验看板）
+├── obs/                    # 只读观测台（独立 go.mod，中英双语文档）
 ├── docs/                   # 完整文档（架构/插件/配置/API/审计/协议/部署/设计稿）
 └── logs/uba.json           # 运行时审计日志（JSON-lines，gitignore）
 ```
@@ -84,24 +85,21 @@ ai-gateway-core/
 
 ## 文档
 
-| 文档 | 内容 |
-|---|---|
-| [架构说明](docs/architecture.md) | 分层架构 / 请求时序 / 模块职责 / 并发设计 |
-| [插件说明](docs/plugins.md) | 5 个内置插件的职责、配置、行为与编写指南 |
-| [配置参考](docs/config-reference.md) | `config.yaml` 全字段类型/默认值/约束 |
-| [API 契约](docs/api.md) | 响应头 / 错误码 / `gateway_meta` / 截断补齐 |
-| [审计日志格式](docs/audit-log.md) | `uba.json` 字段 schema 与计费精度语义 |
-| [协议适配](docs/protocols.md) | 百度换钥流程 / 如何新增非标协议 |
-| [部署指南](docs/deployment.md) | Docker / 热加载 / 生产建议 |
-| [性能基线](docs/benchmark.md) | 实测压测数据与复现方法 |
-| [缺陷/安全待办](docs/backlog.md) | 已知缺陷、PII 方案与修复路线 |
-| [增长路线](docs/roadmap.md) | 功能规划（基础设施 → 差异化 → 社区） |
-| [Fallback 设计](docs/fallback-design.md) | 请求级失败转移（定稿，当前优先） |
-| [内容路由设计](docs/content-routing.md) | 内容感知模型路由（未来，依赖 fallback） |
-| [成本优化方案](docs/cost-optimization.md) | 降 token 方案 + 峰谷价时间路由（纯插件） |
-| [Agent 宽松模式](docs/agent-mode.md) | Agent 流量治理设计（审计保留/干预为零，已实现） |
-| [模型别名设计](docs/model-alias.md) | 别名翻译 + `/v1/models`（开源/Agent 铺路，设计稿） |
-| [发布检查清单](docs/release-checklist.md) | 开源发布逐项核对表（当前状态与阻塞点） |
+| 文档 | 内容 | English |
+|---|---|---|
+| [架构说明](docs/architecture.md) | 分层架构 / 请求时序 / 模块职责 / 并发设计 | [EN](docs/architecture.en.md) |
+| [插件说明](docs/plugins.md) | 6 个内置插件的职责、配置、行为与编写指南 | [EN](docs/plugins.en.md) |
+| [配置参考](docs/config-reference.md) | `config.yaml` 全字段类型/默认值/约束 | [EN](docs/config-reference.en.md) |
+| [API 契约](docs/api.md) | 响应头 / 错误码 / `gateway_meta` / 截断补齐 | [EN](docs/api.en.md) |
+| [审计日志格式](docs/audit-log.md) | `uba.json` 字段 schema 与计费精度语义 | — |
+| [协议适配](docs/protocols.md) | 百度换钥流程 / 如何新增非标协议 | — |
+| [部署指南](docs/deployment.md) | Docker / 热加载 / 生产建议 | — |
+| [性能基线](docs/benchmark.md) | 实测压测数据与复现方法 | — |
+| [观测台说明](obs/README.md) | 只读看板：审计/调用链/成本/拦截与 fallback 标记 | [EN](obs/README.en.md) |
+| [发布检查清单](docs/release-checklist.md) | 开源发布逐项核对表（当前状态与阻塞点） | — |
+
+**设计文档**（中文）：[缺陷/安全待办](docs/backlog.md) · [增长路线](docs/roadmap.md) · [Fallback 设计](docs/fallback-design.md) · [内容路由设计](docs/content-routing.md) · [成本优化方案](docs/cost-optimization.md) · [Agent 宽松模式](docs/agent-mode.md) · [模型别名设计](docs/model-alias.md)
+（欢迎贡献英文翻译。）
 
 ---
 
@@ -307,6 +305,11 @@ curl -s http://localhost:8080/metrics   # 并发/容量/内存水位（Prometheu
 ## 关联项目
 
 - **obs/**（本仓库子目录）：只读观测台，网页查看审计/调用链/成本，独立 go.mod。详见 `obs/README.md`。
+  **无需运行网关即可看效果**——仓库内附示例审计数据：
+  ```bash
+  cd obs && go build -o bin/ai-gateway-obs . && ./bin/ai-gateway-obs -log ../examples/uba.json
+  # 浏览器打开 http://localhost:9090
+  ```
 - **SECURITY.md**：安全策略、已知安全限制与漏洞报告渠道。
 - **CONTRIBUTING.md**：贡献流程与扩展指南。
 - **docs/release-checklist.md**：开源发布逐项核对表。
