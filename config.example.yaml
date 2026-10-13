@@ -1,0 +1,234 @@
+# ============================================================
+# AI-Gateway-Core v0.1  配置示例 (config.example.yaml)
+# ============================================================
+# 使用方法：
+#   1. 复制本文件为 config.yaml：  cp config.example.yaml config.yaml
+#   2. 通过环境变量注入真实密钥（推荐，避免密钥进仓库）：
+#        export DEEPSEEK_API_KEY=sk-xxxx
+#        export QWEN_API_KEY=sk-xxxx
+#        export BAIDU_API_KEY=xxxx
+#        export BAIDU_SECRET_KEY=xxxx
+#   3. 启动：  ./bin/ai-gateway-core serve
+# 说明：config.yaml 已被 .gitignore 忽略，不会提交到仓库。
+# ============================================================
+
+server:
+  host: 0.0.0.0
+  port: 8080
+
+log:
+  level: info
+  # path 留空则由内核按运行环境自动降级:
+  #   Linux -> /var/log/ai-gateway/uba.json
+  #   Mac   -> ./logs/uba.json  (无 root 权限自动 Fallback)
+  path: ""
+
+auth:
+  # 硬件 HAL 指纹比对（TPM2.0 / TEE）。Mac 无 TPM 设备时自动跳过并告警。
+  hal_enabled: false
+  keys:
+    # --- 测试密钥：张三 / 研发部 ---
+    - vkey: "sk-zhangsan-dev-0001"
+      username: "张三"
+      department: "研发部"
+      model_whitelist: ["deepseek-v4-flash", "qwen-turbo"]
+      tags: ["llm", "coding", "rd"]
+      hardware_fingerprint: "tpm2-zhangsan-device-fp-0001"
+    # --- 测试密钥：李四 / 市场部（触发敏感词熔断 + 非标百度换钥代理） ---
+    - vkey: "sk-lisi-dev-0002"
+      username: "李四"
+      department: "市场部"
+      model_whitelist: ["ernie-bot", "qwen-turbo"]
+      tags: ["iot", "marketing"]
+      hardware_fingerprint: "tpm2-lisi-device-fp-0002"
+
+plugins:
+  - name: auth_vkey
+    enabled: true
+    order: 1
+    fail_strategy: abort
+  - name: prompt_injector
+    enabled: true
+    order: 2
+    fail_strategy: bypass
+  # 内容感知模型路由（docs/content-routing.md 阶段 1）：简单→便宜档，复杂→推理档。
+  # 挂载须在 injector(2) 之后、dynamic_router(4) 之前；启用时需把 security_guard 顺延到 order 4。
+  # - name: model_routing
+  #   enabled: true
+  #   order: 3
+  #   fail_strategy: bypass
+  #   config:
+  #     cheap_model: qwen-turbo
+  #     reasoning_model: deepseek-r1
+  #     cheap_token_threshold: 200
+  #     reasoning_keywords: ["分析", "推理", "并发", "算法", "优化", "review"]
+  - name: security_guard
+    enabled: true
+    order: 3
+    fail_strategy: abort
+  - name: dynamic_router
+    enabled: true
+    order: 4
+    fail_strategy: abort
+  - name: auditor
+    enabled: true
+    order: 5
+    fail_strategy: bypass
+
+upstreams:
+  # --- 类 OpenAI 标准轨 ---
+  - name: deepseek
+    endpoint_path: /v1/chat/completions
+    base_url: https://api.deepseek.com
+    api_key_env: DEEPSEEK_API_KEY
+    protocol: openai
+    auth_mode: direct
+    models: ["deepseek-v4-flash"]
+    weight: 1
+    cost_per_1k: 0.14
+    tags: ["llm", "coding"]
+    circuit:
+      failure_threshold: 5
+      open_timeout_sec: 30
+      half_open_max: 3
+  - name: qwen
+    endpoint_path: /v1/chat/completions
+    base_url: https://dashscope.aliyuncs.com/compatible-mode
+    api_key_env: QWEN_API_KEY
+    protocol: openai
+    auth_mode: direct
+    models: ["qwen-turbo"]
+    weight: 1
+    cost_per_1k: 0.20
+    tags: ["llm", "general"]
+    circuit:
+      failure_threshold: 5
+      open_timeout_sec: 30
+      half_open_max: 3
+  # --- 自定义信创轨：百度文心一言（非标协议，无感令牌换取） ---
+  - name: ernie
+    endpoint_path: /v1/chat/completions
+    base_url: https://aip.baidubce.com
+    api_key_env: BAIDU_API_KEY
+    secret_key_env: BAIDU_SECRET_KEY
+    protocol: baidu_wenxin
+    auth_mode: token_exchange
+    models: ["ernie-bot"]
+    weight: 1
+    cost_per_1k: 0.12
+    tags: ["iot", "marketing"]
+    circuit:
+      failure_threshold: 5
+      open_timeout_sec: 30
+      half_open_max: 3
+
+routers:
+  - path: /v1/chat/completions
+    strategy: latency
+    upstreams: ["deepseek", "qwen"]
+    default_model: deepseek-v4-flash
+  - path: /v1/iot/analyze
+    strategy: domain_tag
+    upstreams: ["ernie"]
+    domain_tags: ["iot"]
+
+security:
+  # 敏感词 DLP：大小写不敏感子串匹配，命中 → 伪装 403
+  sensitive_words:
+    - "机密"
+    - "内部机密"
+    - "公司未公开财报"
+    - "internal-secret"
+    # 按公司实际补充：
+    # - "<你的项目代号>"
+    # - "<核心客户名单相关词>"
+    # 可选：合规词（注意误报，见 docs/backlog.md 阶段 2 的 PII 方案）
+    # - "身份证"
+    # - "银行卡"
+  # 防提示词注入正则（引擎自动加 (?i) 做子串匹配）。
+  # 启用策略见 docs/backlog.md：内网定位默认启用「保守子集 ① 指令覆盖 + ② 系统提示词窃取」，
+  # 「激进子集 ③-⑥」按误报观察结果逐步放量。
+  injection_patterns:
+    # ── ① 指令覆盖（保守子集：内部优先启用）──
+    - "ignore previous instructions"
+    - "ignore all previous instructions"
+    - "disregard previous instructions"
+    - "disregard all previous"
+    - "ignore everything above"
+    - "忽略之前的指令"
+    - "忽略之前的所有指令"
+    - "无视之前的指令"
+    - "无视以上内容"
+    # ── ② 系统提示词窃取（保守子集：内部优先启用）──
+    - "reveal your system prompt"
+    - "print your system prompt"
+    - "show your instructions"
+    - "repeat your instructions"
+    - "output your system prompt"
+    - "what are your instructions"
+    - "泄露你的系统提示词"
+    - "输出你的system prompt"
+    - "显示你的指令"
+    - "复述你收到的指令"
+    # ── ③ 角色越狱（激进子集：误报很低，可启用）──
+    # - "act as dan"
+    # - "you are now dan"
+    # - "jailbreak"
+    # - "扮演dan"
+    # - "越狱"
+    # ── ④ 编码/翻译绕行（激进子集：与代码注释/技术文档重叠，谨慎）──
+    # - "base64 (encode|decode) (your|the|this|my) (instructions|prompt|system)"
+    # - "answer in base64"
+    # - "translate (to|into) (french|german|spanish|russian|chinese|english) and (answer|respond|reply)"
+    # ── ⑤ 间接注入/伪装指令（激进子集：与正常任务描述重叠，误杀概率最高，默认关闭）──
+    # - "new instructions"
+    # - "ignore the following"
+    # - "end of instructions"
+    # - "instructions updated"
+    # - "请忽略以上内容"
+    # - "执行以下新指令"
+    # ── ⑥ 数据外带（激进子集：与正常沟通重叠，默认关闭）──
+    # - "repeat everything above"
+    # - "repeat the content above"
+    # - "what was my first message"
+    # - "输出你收到的所有指令"
+    # - "复述整个对话"
+  block_response:
+    error:
+      message: "请求被安全策略拦截"
+      type: "security_blocked"
+      code: "content_filter"
+
+injector:
+  templates:
+    研发部:
+      head: "你是企业内部研发助手，请遵守公司代码安全规范，输出严谨技术答案。"
+      tail: ""
+    市场部:
+      head: "你是物联网行业市场分析助手，请结合行业背景给出专业分析。"
+      tail: ""
+
+transport:
+  connect_timeout_sec: 5
+  ttft_timeout_sec: 10
+  idle_read_timeout_sec: 30
+  max_idle_conns: 100
+  max_idle_conns_per_host: 10
+  # 内存防线（见 docs/backlog.md「1.5 内存防线」）：0 = 不限制（默认，向后兼容）
+  # max_request_body_bytes: 52428800    # 请求体上限，多人场景建议 50 MiB 宽松兜底（层 1）
+  # max_audit_body_bytes: 1048576       # 非流式响应审计缓冲上限，超限放弃解析 usage 降级 estimated（层 2）
+  # Agent 宽松模式（docs/agent-mode.md）：仅对 agent_mode: true 的 key 生效
+  # agent_ttft_timeout_sec: 120         # agent 首字超时放大（推理长思考），0=沿用 ttft_timeout_sec
+  # agent_max_request_body_bytes: 0     # agent 请求体上限，0=沿用全局（非"不限"）
+  # agent_gateway_meta: false           # agent 是否注入 gateway_meta（默认 false = 不注入，严格解析器兼容）
+
+edge_storage:
+  enabled: true
+  max_disk_mb: 512
+  strategy: rotate
+  report_url: "https://uba.example.com/ingest"
+
+watchdog:
+  enabled: true
+  device: /dev/watchdog
+  interval_sec: 30

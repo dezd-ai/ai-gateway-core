@@ -1,0 +1,18 @@
+services:
+  gateway:
+    build: .
+    image: ai-gateway-core:latest
+    container_name: ai-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      # 只读挂载配置；宿主机改动后网关自动热加载，无需重启容器
+      - ./config.yaml:/app/config.yaml:ro
+      # 审计日志持久化，防止容器重建丢失 uba.json
+      - ./logs:/app/logs
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - QWEN_API_KEY=${QWEN_API_KEY:-}
+      - BAIDU_API_KEY=${BAIDU_API_KEY:-}
+      - BAIDU_SECRET_KEY=${BAIDU_SECRET_KEY:-}
+    restart: unless-stopped

@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-Gateway 观测台</title>
+<style>
+  :root {
+    --bg: #0f1420;
+    --panel: #171e2e;
+    --panel2: #1d2740;
+    --border: #2a3550;
+    --text: #e6ebf5;
+    --muted: #8b96ad;
+    --accent: #4f8cff;
+    --green: #35c08a;
+    --yellow: #e6b450;
+    --red: #e5636b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  header .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { opacity: .4; } }
+
+  main { padding: 20px 24px; max-width: 1280px; margin: 0 auto; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card .label { color: var(--muted); font-size: 12px; }
+  .card .value { font-size: 24px; font-weight: 650; margin-top: 4px; }
+  .card .unit { font-size: 12px; color: var(--muted); margin-left: 2px; }
+
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .panel h2 { font-size: 14px; margin: 0 0 12px; font-weight: 600; color: var(--text); }
+
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+  .filters select, .filters input, .filters button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; font-size: 13px; outline: none;
+  }
+  .filters button { background: var(--accent); border-color: var(--accent); cursor: pointer; color: #fff; }
+
+  .chart { margin-bottom: 20px; }
+  .bar-row { display: grid; grid-template-columns: 110px 1fr 90px; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .bar-label { color: var(--muted); font-size: 12px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar { background: var(--panel2); border-radius: 6px; height: 18px; overflow: hidden; }
+  .bar-fill { background: linear-gradient(90deg, var(--accent), var(--green)); height: 100%; border-radius: 6px; transition: width .4s; }
+  .bar-val { font-size: 12px; color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; position: sticky; top: 0; background: var(--panel); }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--panel2); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .tag { padding: 2px 8px; border-radius: 20px; font-size: 11px; }
+  .tag.pass { background: rgba(53,192,138,.15); color: var(--green); }
+  .tag.official { background: rgba(79,140,255,.15); color: var(--accent); }
+  .tag.estimated { background: rgba(230,180,80,.15); color: var(--yellow); }
+  .tag.fallback { background: rgba(190,120,255,.15); color: #be78ff; }
+  .tag.blocked { background: rgba(229,99,107,.15); color: var(--red); }
+
+  .detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 10; }
+  .detail-overlay.open { display: flex; align-items: center; justify-content: center; }
+  .detail { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; width: 720px; max-width: 94vw; max-height: 86vh; overflow: auto; padding: 20px; }
+  .detail h3 { margin: 0 0 4px; font-size: 15px; }
+  .detail .close { float: right; background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; }
+  .detail dl { display: grid; grid-template-columns: 160px 1fr; gap: 6px 12px; margin: 16px 0 0; }
+  .detail dt { color: var(--muted); }
+  .detail dd { margin: 0; word-break: break-all; }
+  .plugins { display: flex; flex-wrap: wrap; gap: 6px; }
+  .plugins span { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 12px; }
+
+  .chain { margin-top: 16px; }
+  .step { display: flex; gap: 14px; position: relative; padding-bottom: 16px; }
+  .step:not(:last-child)::before { content: ''; position: absolute; left: 15px; top: 30px; bottom: 0; width: 2px; background: var(--border); }
+  .step-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; z-index: 1; }
+  .step-body { padding-top: 4px; }
+  .step-name { font-weight: 600; font-size: 14px; }
+  .step-desc { color: var(--muted); font-size: 12px; }
+  .step-detail { font-size: 12px; color: var(--text); margin-top: 2px; background: var(--panel2); border-radius: 6px; padding: 4px 8px; display: inline-block; }
+  .chain-btn { background: var(--panel2); color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: 12px; cursor: pointer; }
+  .chain-btn:hover { border-color: var(--accent); }
+
+  .empty { color: var(--muted); text-align: center; padding: 40px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>AI-Gateway 观测台</h1>
+    <div class="sub">审计 · 调用链 · 成本</div>
+  </div>
+  <div class="badge"><span class="dot"></span> 每 3s 自动刷新</div>
+</header>
+
+<main>
+  <section class="cards">
+    <div class="card"><div class="label">总请求数</div><div class="value" id="c-requests">-</div></div>
+    <div class="card"><div class="label">总 Token</div><div class="value" id="c-tokens">-</div></div>
+    <div class="card"><div class="label">总成本</div><div class="value" id="c-cost">-</div></div>
+    <div class="card"><div class="label">缓存命中率</div><div class="value" id="c-cache">-</div></div>
+    <div class="card"><div class="label">平均时延</div><div class="value" id="c-latency">-</div></div>
+  </section>
+
+  <div class="filters">
+    <select id="f-user"><option value="">全部用户</option></select>
+    <select id="f-model"><option value="">全部模型</option></select>
+    <select id="f-upstream"><option value="">全部上游</option></select>
+    <button onclick="loadRecords()">筛选 / 刷新</button>
+  </div>
+
+  <section class="panel chart">
+    <h2>成本分布（按用户）</h2>
+    <div id="chart"></div>
+  </section>
+
+  <section class="panel">
+    <h2>审计记录（点击行查看调用链）</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>时间</th><th>用户</th><th>部门</th><th>模型</th><th>上游</th>
+            <th class="num">Prompt</th><th class="num">Completion</th><th class="num">Total</th>
+            <th class="num">成本</th><th>计费</th><th>安全</th><th>状态</th><th class="num">时延</th><th>调用链</th>
+          </tr>
+        </thead>
+        <tbody id="records-body"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty" style="display:none;">暂无记录（请先让网关产生请求，或检查日志路径）</div>
+  </section>
+</main>
+
+<div class="detail-overlay" id="overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail" id="detail"></div>
+</div>
+
+<script>
+const fmt = n => (n == null ? '-' : Number(n).toLocaleString('zh-CN'));
+
+function fmtCost(r) {
+  return r.rate_known ? r.cost.toFixed(4) : '-';
+}
+function fmtTime(ts) {
+  if (!ts) return '-';
+  return ts.slice(11, 19);
+}
+function fmtMs(ms) {
+  return ms == null ? '-' : ms + ' ms';
+}
+
+async function loadStats() {
+  const s = await fetch('/api/stats').then(r => r.json());
+  document.getElementById('c-requests').textContent = fmt(s.total_requests);
+  document.getElementById('c-tokens').textContent = fmt(s.total_tokens);
+  document.getElementById('c-cost').textContent = s.total_requests ? s.cost.toFixed(4) : '-';
+  document.getElementById('c-latency').textContent = s.total_requests ? s.avg_duration_ms.toFixed(0) + ' ms' : '-';
+  const cachePct = s.total_requests ? (s.cache_hit_requests / s.total_requests * 100).toFixed(1) + '%' : '-';
+  document.getElementById('c-cache').textContent = cachePct;
+  renderChart(s.by_user);
+}
+
+function renderChart(groups) {
+  const el = document.getElementById('chart');
+  const data = (groups || []).slice(0, 8);
+  if (!data.length) { el.innerHTML = '<div class="empty">暂无成本数据</div>'; return; }
+  const max = Math.max(...data.map(g => g.cost), 1e-9);
+  el.innerHTML = data.map(g => `
+    <div class="bar-row">
+      <span class="bar-label" title="${g.key}">${g.key}</span>
+      <div class="bar"><div class="bar-fill" style="width:${(g.cost / max * 100).toFixed(1)}%"></div></div>
+      <span class="bar-val">${g.cost.toFixed(4)} (${fmt(g.total_tokens)} tok)</span>
+    </div>`).join('');
+}
+
+async function loadRecords() {
+  const params = new URLSearchParams({ limit: '300' });
+  const u = document.getElementById('f-user').value;
+  const m = document.getElementById('f-model').value;
+  const up = document.getElementById('f-upstream').value;
+  if (u) params.set('username', u);
+  if (m) params.set('model', m);
+  if (up) params.set('upstream', up);
+
+  const recs = await fetch('/api/records?' + params).then(r => r.json());
+  const body = document.getElementById('records-body');
+  const empty = document.getElementById('empty');
+  empty.style.display = recs.length ? 'none' : 'block';
+  body.innerHTML = recs.map(r => `
+    <tr data-id="${r.trace_id}">
+      <td>${fmtTime(r.timestamp)}</td>
+      <td>${r.username || '-'}</td>
+      <td>${r.department || '-'}</td>
+      <td>${r.model || '-'}</td>
+      <td>${r.fallback_chain && r.fallback_chain.length > 1 ? '<span class="tag fallback">↪ ' + r.fallback_chain.join('→') + '</span>' : (r.upstream || '-')}</td>
+      <td class="num">${fmt(r.prompt_tokens)}</td>
+      <td class="num">${fmt(r.completion_tokens)}</td>
+      <td class="num">${fmt(r.total_tokens)}</td>
+      <td class="num">${fmtCost(r)}</td>
+      <td><span class="tag ${r.precision === 'official' || r.precision === 'official_cached' ? 'official' : 'estimated'}">${r.precision}</span></td>
+      <td><span class="tag pass">${r.security_check || '-'}</span></td>
+      <td>${r.success === false ? '<span class="tag blocked">拦截 ' + r.http_status + (r.abort_reason ? ' · ' + r.abort_reason : '') + '</span>' : '<span class="tag pass">通过</span>'}</td>
+      <td class="num">${fmtMs(r.duration_ms)}</td>
+      <td><button class="chain-btn" onclick="event.stopPropagation(); showTrace('${r.trace_id}')">调用链</button></td>
+    </tr>`).join('');
+  body.querySelectorAll('tr').forEach(tr => tr.onclick = () => showTrace(tr.dataset.id));
+}
+
+const PLUGIN_DESC = {
+  auth_vkey: '鉴权：校验 vKey，注入身份与画像',
+  prompt_injector: '注入：解析 Body，按部门无感注入企业模板',
+  security_guard: '防护：敏感词 DLP 与防提示词注入扫描',
+  dynamic_router: '路由：按策略挑选最佳上游并替换凭证',
+  auditor: '审计：流式拦截、Token 统计与官方计费覆盖'
+};
+
+function stepDetail(r, plugin) {
+  switch (plugin) {
+    case 'auth_vkey':
+      return `身份：${r.username || '-'}（${r.department || '-'}）`;
+    case 'prompt_injector':
+      return `注入：${r.prompt_injected ? '是' : '否'} · 模型：${r.model || '-'}`;
+    case 'security_guard':
+      return `结果：${r.security_check || '-'}`;
+    case 'dynamic_router':
+      return `命中上游：${r.upstream || '-'}`;
+    case 'auditor':
+      return `Token ${fmt(r.prompt_tokens)} + ${fmt(r.completion_tokens)} = ${fmt(r.total_tokens)} · 精度 ${r.precision || '-'} · 缓存 ${fmt(r.cached_tokens)} · 成本 ${fmtCost(r)}`;
+    default:
+      return '-';
+  }
+}
+
+function renderChain(r) {
+  const plugins = r.executed_plugins || [];
+  if (!plugins.length) return '<div class="empty">该记录无插件执行链</div>';
+  return `<div class="chain">` + plugins.map((p, i) => `
+    <div class="step">
+      <div class="step-dot">${i + 1}</div>
+      <div class="step-body">
+        <div class="step-name">${p}</div>
+        <div class="step-desc">${PLUGIN_DESC[p] || ''}</div>
+        <div class="step-detail">${stepDetail(r, p)}</div>
+      </div>
+    </div>`).join('') + `</div>`;
+}
+
+async function showTrace(id) {
+  const r = await fetch('/api/trace?id=' + id).then(res => res.json());
+  if (r.error) { alert(r.error); return; }
+  document.getElementById('detail').innerHTML = `
+    <button class="close" onclick="closeDetail()">&times;</button>
+    <h3>调用链详情</h3>
+    <div style="color:var(--muted);font-size:12px;">
+      Trace ID：<span style="color:var(--accent)">${r.trace_id}</span> ·
+      ${r.timestamp || '-'} · 总耗时 ${fmtMs(r.duration_ms)}
+    </div>
+    ${renderChain(r)}
+    <dl>
+      <dt>模型 / 上游</dt><dd>${r.model || '-'} / ${r.upstream || '-'}</dd>
+      ${r.fallback_chain && r.fallback_chain.length > 1 ? `<dt>Fallback 链</dt><dd>${r.fallback_chain.join(' → ')} · 尝试 ${r.attempts || '-'} 次${r.chain_truncated ? ' · 已截断' : ''}${r.stop_reason ? ' · ' + r.stop_reason : ''}</dd>` : ''}
+      <dt>Prompt / Completion</dt><dd>${fmt(r.prompt_tokens)} / ${fmt(r.completion_tokens)}</dd>
+      <dt>Total / Cached</dt><dd>${fmt(r.total_tokens)} / ${fmt(r.cached_tokens)}</dd>
+      <dt>计费精度 / 成本</dt><dd>${r.precision || '-'} / ${fmtCost(r)}</dd>
+    </dl>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+async function loadFilters() {
+  const recs = await fetch('/api/records?limit=1000').then(r => r.json());
+  const users = new Set(), models = new Set(), ups = new Set();
+  recs.forEach(r => {
+    if (r.username) users.add(r.username);
+    if (r.model) models.add(r.model);
+    if (r.upstream) ups.add(r.upstream);
+  });
+  fill('f-user', users);
+  fill('f-model', models);
+  fill('f-upstream', ups);
+}
+function fill(id, set) {
+  const sel = document.getElementById(id);
+  const cur = sel.value;
+  [...set].sort().forEach(v => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v;
+    sel.appendChild(o);
+  });
+  sel.value = cur;
+}
+
+function refresh() { loadStats(); loadRecords(); }
+loadFilters();
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>

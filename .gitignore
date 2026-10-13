@@ -1,0 +1,22 @@
+# 构建产物
+bin/
+obs/obs
+obs/bin/
+
+# 本地配置（可能含真实密钥，绝不提交）
+config.yaml
+
+# 运行时日志与审计数据（含 uba.json / quota.json）
+logs/
+
+# 内部工作文档（不对外发布）
+宇宙终极完全体技术规格书.txt
+
+# Go 测试/覆盖率产物
+*.test
+*.out
+coverage.*
+
+# 系统/编辑器
+.DS_Store
+*.swp

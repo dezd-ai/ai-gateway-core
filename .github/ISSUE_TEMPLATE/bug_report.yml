@@ -1,0 +1,59 @@
+name: Bug 报告
+description: 提交一个缺陷（Bug）
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢报告问题！请尽量提供可复现信息。
+        ⚠️ 安全漏洞请勿在此公开提交，走 [SECURITY.md](../../SECURITY.md) 的私密渠道。
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: 二进制版本号或 commit 号
+      placeholder: v0.1.0 / <commit>
+    validations:
+      required: true
+  - type: input
+    id: goenv
+    attributes:
+      label: 环境
+      description: 操作系统 + Go 版本
+      placeholder: macOS 26 / go1.23.11
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 期望行为
+      description: 你期望发生什么？
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？（附上错误输出）
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      description: 最小化复现步骤 + 相关配置（注意脱敏，勿贴真实密钥）
+      render: bash
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 影响模块
+      options:
+        - kernel（内核/路由/代理）
+        - plugins（内置插件）
+        - config（配置解析/校验）
+        - doctor / bench
+        - obs（观测台）
+        - docs
+        - 其他

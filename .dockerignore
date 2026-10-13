@@ -1,0 +1,21 @@
+# 构建上下文排除项（不影响镜像内容，仅减小传输体积）
+
+# 本地配置与密钥：绝不进入镜像/构建上下文
+config.yaml
+.env
+
+# 运行时产物
+bin/
+logs/
+*.test
+*.out
+coverage.*
+
+# 文档与开发辅助（非构建所需）
+docs/
+.github/
+obs/
+
+# 系统/编辑器
+.DS_Store
+*.swp
