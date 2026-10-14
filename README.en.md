@@ -100,7 +100,25 @@ ai-gateway-core/
 **Design documents** (Chinese): [backlog](docs/backlog.md) · [roadmap](docs/roadmap.md) · [fallback-design](docs/fallback-design.md) · [content-routing](docs/content-routing.md) · [cost-optimization](docs/cost-optimization.md) · [agent-mode](docs/agent-mode.md) · [model-alias](docs/model-alias.md)
 English translations of the design documents are welcome as contributions.
 
-### See the dashboard without running a gateway
+---
+
+## Performance (measured)
+
+Single machine, 5s × 50 concurrent workers (in-memory mock upstream, macOS Apple Silicon):
+
+```
+Throughput     : 4900 req/s     Requests: 24500     Failures: 0
+Latency        : P50 12.6ms / P90 13.0ms / P99 13.6ms
+Memory         : 0.5MB baseline → 20MB peak (pooled buffers, no growth trend)
+Conn reuse     : goroutines peak 458 → 2 at end (residual -4, no leaks)
+```
+
+> The reported "403 rate 19.9%" is the built-in benchmark case mix (1 violation case per 5 requests), not errors.
+> Full data, a 200-worker saturation point and reproduction steps are in [docs/benchmark.md](docs/benchmark.md).
+
+---
+
+## Demo (no gateway required)
 
 Sample audit data ships in the repo, so you can open a fully populated dashboard immediately:
 
