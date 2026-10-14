@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 // buildKeyGateway 用自定义 auth key 构造完整网关（happy 上游）。

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 // TestAbortRequestAudit 验证 backlog #4：被 PreRequest 拦截的 401/403 落审计，

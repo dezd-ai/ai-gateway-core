@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // 节点运行时状态，跨配置热加载持久保留（断路器/EMA/连接计数不因刷新归零）。

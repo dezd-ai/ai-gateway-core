@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 // ModelRoutingPlugin 内容感知模型路由（docs/content-routing.md 阶段 1）：

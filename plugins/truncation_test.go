@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 // TestMidStreamTruncationOpensBreaker 验证 fallback-design.md 第 8 节：

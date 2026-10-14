@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/DezDing/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 // DynamicRouterPlugin 在反向代理 Director 阶段读取路由策略，

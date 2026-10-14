@@ -60,7 +60,7 @@ go build -o bin/ai-gateway-obs .   # 或 go run .
 
 ```
 ai-gateway-obs/
-├── go.mod            # module github.com/DezDing/ai-gateway-core/obs（独立模块）
+├── go.mod            # module github.com/dezd-ai/ai-gateway-core/obs（独立模块）
 ├── main.go           # HTTP 服务 + /api/* 接口 + go:embed 网页
 ├── store.go          # uba.json 读取/过滤/聚合（RWMutex + 2s 周期刷新）
 ├── cost.go           # 从 config.yaml 提取各上游 cost_per_1k

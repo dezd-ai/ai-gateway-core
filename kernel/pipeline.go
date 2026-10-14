@@ -7,7 +7,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // PluginFactory 是插件构造器，供各插件包通过 RegisterPlugin 注册。

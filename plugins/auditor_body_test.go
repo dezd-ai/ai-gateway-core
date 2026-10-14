@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/DezDing/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 // TestJSONAuditBodyTruncation 验证非流式响应审计缓冲上限（内存防线 层 2）：

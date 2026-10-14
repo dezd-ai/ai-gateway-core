@@ -1,4 +1,4 @@
-module github.com/DezDing/ai-gateway-core/obs
+module github.com/dezd-ai/ai-gateway-core/obs
 
 go 1.23
 

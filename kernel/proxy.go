@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // NewTransport 构造一个上游连接池 Transport，锁死连接/首字/空闲读超时。

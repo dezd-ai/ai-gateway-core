@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 func agentCtx(cfg *config.Config, whitelist []string) *kernel.PluginContext {

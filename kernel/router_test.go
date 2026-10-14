@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 func TestSupportsModel(t *testing.T) {

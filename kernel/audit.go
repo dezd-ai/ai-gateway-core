@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // auditStdout 控制审计日志是否同步回显到标准输出；压测/测试时关闭以隔离噪声。

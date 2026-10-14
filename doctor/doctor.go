@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/kernel"
-	"github.com/DezDing/ai-gateway-core/mockup"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/mockup"
 )
 
 const banner = `

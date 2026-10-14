@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // fallbackPlanKey 在请求 Context 中携带 failover 候选计划。

@@ -9,13 +9,13 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/DezDing/ai-gateway-core/plugins" // 触发各插件 init 注册
+	_ "github.com/dezd-ai/ai-gateway-core/plugins" // 触发各插件 init 注册
 
-	"github.com/DezDing/ai-gateway-core/bench"
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/doctor"
-	"github.com/DezDing/ai-gateway-core/kernel"
-	"github.com/DezDing/ai-gateway-core/mockup"
+	"github.com/dezd-ai/ai-gateway-core/bench"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/doctor"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/mockup"
 )
 
 // version 由构建时注入：go build -ldflags "-X main.version=v0.1.0"

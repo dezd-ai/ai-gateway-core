@@ -13,10 +13,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/kernel"
-	"github.com/DezDing/ai-gateway-core/mockup"
-	"github.com/DezDing/ai-gateway-core/plugins"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/mockup"
+	"github.com/dezd-ai/ai-gateway-core/plugins"
 )
 
 const banner = `

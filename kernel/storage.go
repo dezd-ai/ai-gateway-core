@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // EdgeStorage 是边缘环形时序落盘器（TSDB 前端）与异步上报队列。

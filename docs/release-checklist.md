@@ -9,7 +9,7 @@
 
 | # | 项 | 状态 | 说明 |
 |---|---|---|---|
-| 1.1 | 确定仓库地址与平台 | ✅ 已完成 | **GitHub · `DezDing/ai-gateway-core`** |
+| 1.1 | 确定仓库地址与平台 | ✅ 已完成 | **GitHub · `dezd-ai/ai-gateway-core`** |
 | 1.2 | 替换模块路径 | ✅ 已完成 | `go.mod` + `obs/go.mod` + 31 个 Go/MD 文件共 58 处；替换后 build/vet/test/gofmt 全绿 |
 | 1.3 | `git init` + 首次提交 | 🔨 待执行 | 命令见第 5 节 |
 | 1.4 | LICENSE 版权署名 | ⏸️ 保持模板占位 | 按决定暂不填（Apache-2.0 正文完整，仅署名待补） |

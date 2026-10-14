@@ -6,8 +6,8 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/DezDing/ai-gateway-core/config"
-	"github.com/DezDing/ai-gateway-core/kernel"
+	"github.com/dezd-ai/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 // AuthVKeyPlugin 提取 Bearer vKey，在内存 O(1) Map 中鉴权，

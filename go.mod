@@ -1,4 +1,4 @@
-module github.com/DezDing/ai-gateway-core
+module github.com/dezd-ai/ai-gateway-core
 
 go 1.23
 

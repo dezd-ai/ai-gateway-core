@@ -60,7 +60,7 @@ Override via flags:
 
 ```
 ai-gateway-obs/
-├── go.mod            # module github.com/DezDing/ai-gateway-core/obs (separate module)
+├── go.mod            # module github.com/dezd-ai/ai-gateway-core/obs (separate module)
 ├── main.go           # HTTP server + /api/* endpoints + go:embed frontend
 ├── store.go          # uba.json read/filter/aggregate (RWMutex + 2s refresh)
 ├── cost.go           # extract per-upstream cost_per_1k from config.yaml

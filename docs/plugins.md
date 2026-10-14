@@ -216,7 +216,7 @@ package plugins
 
 import (
     "net/http"
-    "github.com/DezDing/ai-gateway-core/kernel"
+    "github.com/dezd-ai/ai-gateway-core/kernel"
 )
 
 type MyPlugin struct{ kernel.BasePlugin }

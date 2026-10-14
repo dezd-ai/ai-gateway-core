@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // MemGuard 是内存防线层 3（并发准入）+ 层 4（水位熔断）的实现（docs/backlog.md「1.5」）。

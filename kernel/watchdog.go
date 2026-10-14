@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // ResolveLogPath 依据运行环境自适应日志路径：Mac 降级写入项目内 logs/ 目录。

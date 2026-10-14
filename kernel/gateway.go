@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DezDing/ai-gateway-core/config"
+	"github.com/dezd-ai/ai-gateway-core/config"
 )
 
 // runtimeSnapshot 是网关运行时的不可变快照：配置 + 插件链 + 路由表 + 反向代理。
