@@ -37,7 +37,7 @@
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
   @keyframes pulse { 50% { opacity: .4; } }
 
-  main { padding: 20px 24px; max-width: 1280px; margin: 0 auto; }
+  main { padding: 20px 24px; max-width: 1440px; margin: 0 auto; }
 
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
   .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
@@ -63,8 +63,8 @@
   .bar-fill { background: linear-gradient(90deg, var(--accent), var(--green)); height: 100%; border-radius: 6px; transition: width .4s; }
   .bar-val { font-size: 12px; color: var(--text); }
 
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
   th { color: var(--muted); font-weight: 500; font-size: 12px; position: sticky; top: 0; background: var(--panel); }
   tbody tr { cursor: pointer; }
   tbody tr:hover { background: var(--panel2); }
@@ -218,7 +218,7 @@ async function loadRecords() {
       <td class="num">${fmtCost(r)}</td>
       <td><span class="tag ${r.precision === 'official' || r.precision === 'official_cached' ? 'official' : 'estimated'}">${r.precision}</span></td>
       <td><span class="tag pass">${r.security_check || '-'}</span></td>
-      <td>${r.success === false ? '<span class="tag blocked">拦截 ' + r.http_status + (r.abort_reason ? ' · ' + r.abort_reason : '') + '</span>' : '<span class="tag pass">通过</span>'}</td>
+      <td>${r.success === false ? '<span class="tag blocked" title="' + (r.abort_reason || '') + '">拦截 ' + r.http_status + '</span>' : '<span class="tag pass">通过</span>'}</td>
       <td class="num">${fmtMs(r.duration_ms)}</td>
       <td><button class="chain-btn" onclick="event.stopPropagation(); showTrace('${r.trace_id}')">调用链</button></td>
     </tr>`).join('');
