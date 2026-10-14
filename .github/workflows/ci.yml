@@ -14,11 +14,12 @@ jobs:
         # 最低支持版本（go.mod 声明）+ 最新稳定版，确保上下限兼容
         go-version: ['1.23.11', 'stable']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go-version }}
-          cache: true
+          # 零外部依赖，无 go.sum；用 go.mod 作为缓存键
+          cache-dependency-path: go.mod
       - name: Build
         run: go build ./...
       - name: Vet
@@ -29,7 +30,7 @@ jobs:
         run: |
           unformatted=$(gofmt -l . | grep -v '^obs/obs$' || true)
           if [ -n "$unformatted" ]; then
-            echo "以下文件未格式化："
+            echo "以下文件未格式化（请运行 gofmt -w）："
             echo "$unformatted"
             exit 1
           fi
@@ -38,11 +39,10 @@ jobs:
     name: obs (build / vet)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: 'stable'
-          cache: true
           cache-dependency-path: obs/go.mod
       - name: Build obs
         run: cd obs && go build ./...
