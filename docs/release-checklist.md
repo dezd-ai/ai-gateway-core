@@ -1,7 +1,7 @@
 # 开源发布检查清单（Release Checklist）
 
 > 用途：首次开源发布与后续版本发布的**逐项核对表**。每项标注当前状态。
-> 关联：[README 已知限制](../README.md#已知限制与待办) · [roadmap.md](./roadmap.md) · [SECURITY.md](../SECURITY.md)
+> 关联：[README 已知限制](../README.zh.md#已知限制与待办) · [roadmap.md](./roadmap.md) · [SECURITY.md](../SECURITY.md)
 
 ---
 

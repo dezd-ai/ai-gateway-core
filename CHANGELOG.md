@@ -84,4 +84,4 @@
 - 多实例下限流/配额为进程内近似计数。
 - 端侧算法分发（`X-Algorithm`）未实现。
 
-详见 [README 已知限制](README.md#已知限制与待办) 与 [docs/backlog.md](docs/backlog.md)。
+详见 [README 已知限制](README.zh.md#已知限制与待办) 与 [docs/backlog.md](docs/backlog.md)。
