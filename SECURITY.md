@@ -11,12 +11,19 @@
 
 请**不要**在公开 Issue 中提交安全漏洞细节。
 
-- **方式一（推荐）**：发送邮件至项目维护者（见 `MAINTAINERS.md`），主题前缀 `[SECURITY]`，并包含：
-  - 漏洞类型与影响面；
-  - 复现步骤（最小化用例）；
-  - 受影响的版本与配置；
-  - 可选的修复建议。
-- **方式二**：通过仓库的私有安全报告通道（GitHub Security Advisory / Gitee 私有反馈）提交。
+- **方式一（推荐）**：使用仓库的**私密漏洞报告**通道 —— 打开
+  <https://github.com/dezd-ai/ai-gateway-core/security/advisories/new>
+  （仅维护者可见，无需邮箱，也不会公开披露直到修复完成）。
+- **方式二**：若该入口不可用，在 [Issues](https://github.com/dezd-ai/ai-gateway-core/issues) 中发一条**不含细节**的说明并 `@dezd-ai`，维护者会私信你建立私密渠道。
+
+报告请包含：
+
+- 漏洞类型与影响面；
+- 复现步骤（最小化用例）；
+- 受影响的版本与配置；
+- 可选的修复建议。
+
+> 本项目**不公开个人邮箱**（提交使用 GitHub noreply 地址）；其它联系方式见 [MAINTAINERS.md](MAINTAINERS.md)。
 
 ## 响应承诺
 

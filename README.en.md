@@ -109,6 +109,10 @@ cd obs && go build -o bin/ai-gateway-obs . && ./bin/ai-gateway-obs -log ../examp
 # open http://localhost:9090
 ```
 
+<!-- Screenshot slot: capture the dashboard with the sample data above, save as
+     docs/images/dashboard.png, then uncomment the line below. -->
+<!-- ![Dashboard](docs/images/dashboard.png) -->
+
 ---
 
 ## Core design

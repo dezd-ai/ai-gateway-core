@@ -2,11 +2,22 @@
 
 ## 维护者列表
 
-> 待补充：项目开源时在此登记维护者姓名/昵称、邮箱与职责。
-
-| 维护者 | 邮箱 | 职责 |
+| 维护者 | 联系方式 | 职责 |
 |---|---|---|
-| 待定（项目发起人） | 待定 | 内核架构、路线图决策、Release 管理 |
+| [@dezd-ai](https://github.com/dezd-ai) | GitHub（见下方渠道） | 内核架构、路线图决策、Release 管理 |
+
+## 联系方式（推荐渠道）
+
+本项目**不公开个人邮箱**（提交记录使用 GitHub noreply 地址）。请通过以下渠道联系：
+
+| 场景 | 渠道 |
+|---|---|
+| 使用问题、功能建议 | [GitHub Issues](https://github.com/dezd-ai/ai-gateway-core/issues) |
+| 社区讨论、经验分享 | [GitHub Discussions](https://github.com/dezd-ai/ai-gateway-core/discussions) |
+| **安全漏洞（私密报告）** | 仓库 **Security → Report a vulnerability**（仅维护者可见，无需邮箱）；详见 [SECURITY.md](SECURITY.md) |
+| 直接提及维护者 | 在 Issue / PR 中 `@dezd-ai` |
+
+> 若需邮件沟通（如企业合作），请在 Issue 中说明，维护者会通过 GitHub 私信回复。
 
 ## 决策流程
 

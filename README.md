@@ -103,6 +103,20 @@ ai-gateway-core/
 
 ---
 
+## 演示（无需运行网关）
+
+仓库内附**示例审计数据**，一条命令即可看到完整观测台效果（含正常请求、4 类拦截红标、failover 紫标、agent 蓝标）：
+
+```bash
+cd obs && go build -o bin/ai-gateway-obs . && ./bin/ai-gateway-obs -log ../examples/uba.json
+# 浏览器打开 http://localhost:9090
+```
+
+<!-- 截图位：用上面的示例数据截图 → 存为 docs/images/dashboard.png → 取消下面注释 -->
+<!-- ![观测台看板](docs/images/dashboard.png) -->
+
+---
+
 ## 核心设计
 
 ### 1. 请求生命周期
