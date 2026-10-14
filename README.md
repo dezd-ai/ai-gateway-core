@@ -128,8 +128,11 @@ cd obs && go build -o bin/ai-gateway-obs . && ./bin/ai-gateway-obs -log ../examp
 # 浏览器打开 http://localhost:9090
 ```
 
-<!-- 截图位：用上面的示例数据截图 → 存为 docs/images/dashboard.png → 取消下面注释 -->
-<!-- ![观测台看板](docs/images/dashboard.png) -->
+![观测台看板](docs/images/dashboard.png)
+
+点击表格任意一行可查看**调用链时间线**（按插件执行顺序展示每步做了什么、产出了什么数据）：
+
+![调用链详情](docs/images/dashboard-chain.png)
 
 ---
 

@@ -127,9 +127,11 @@ cd obs && go build -o bin/ai-gateway-obs . && ./bin/ai-gateway-obs -log ../examp
 # open http://localhost:9090
 ```
 
-<!-- Screenshot slot: capture the dashboard with the sample data above, save as
-     docs/images/dashboard.png, then uncomment the line below. -->
-<!-- ![Dashboard](docs/images/dashboard.png) -->
+![Dashboard](docs/images/dashboard.png)
+
+Click any table row to open the **call-chain timeline** (plugin execution order, with what each step did and produced):
+
+![Call chain](docs/images/dashboard-chain.png)
 
 ---
 
