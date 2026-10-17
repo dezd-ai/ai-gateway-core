@@ -8,7 +8,7 @@
 
 - **代理阶段错误落审计（backlog #9）**：404 无路由（`no_route`）、502 代理失败（`proxy_error`）、503 全上游熔断（`circuit_open`）此前既不经过 `writeAbort` 也不经过 auditor，审计链路缺一段；现由 `defaultErrorHandler` 复用 `EmitAbortAudit` 落记录。顺带修正：路由层「全部熔断」哨兵 `errAllNodesOpen` 对外统一映射为 503（此前误报 502）。回归测试：`plugins/proxy_audit_test.go`。
 
-## [v0.1.0] - 2025-08-28（首个开源版本）
+## [v0.1.0] - 2026-10-14（首个开源版本；内核原型始于 2025-08）
 
 > 本版本包含内核原型 + 后续全部增强：请求级失败转移、治理能力（vKey 生命周期/限流/配额/拦截审计）、内存防线五层、Agent 宽松模式、内容路由。
 
