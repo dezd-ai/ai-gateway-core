@@ -1,0 +1,137 @@
+name: SDK compatibility
+
+# 验证 OpenAI 官方 SDK 直连网关开箱可用（roadmap R3 信任点）：
+# openai-python / openai-node 以 base_url 指向网关，使用模型别名完成
+# /v1/models 列表、非流式与流式对话，全程 mock 上游、无需真实密钥。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  openai-python:
+    name: openai-python (Python 3.12)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.23.11'
+          cache: true
+          cache-dependency-path: go.mod
+      - name: Build gateway and serve in mock mode
+        run: |
+          go build -o ai-gateway-core .
+          cp config.example.yaml config.yaml
+          ./ai-gateway-core serve -mock > /tmp/gateway.log 2>&1 &
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/metrics || true)
+            [ "$code" = "200" ] && break
+            sleep 0.5
+          done
+          curl -sf -o /dev/null http://127.0.0.1:8080/metrics || { cat /tmp/gateway.log; exit 1; }
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install openai
+        run: pip install --quiet openai
+      - name: Smoke test (models / alias / non-stream / stream)
+        run: |
+          python - <<'PY'
+          from openai import OpenAI
+
+          c = OpenAI(base_url="http://127.0.0.1:8080/v1", api_key="sk-zhangsan-dev-0001")
+
+          # 1) 模型清单：应含别名 chat / cheap
+          models = [m.id for m in c.models.list().data]
+          assert "chat" in models, f"models missing alias: {models}"
+
+          # 2) 别名非流式对话
+          r = c.chat.completions.create(
+              model="chat",
+              messages=[{"role": "user", "content": "hi"}],
+              max_tokens=8,
+          )
+          content = r.choices[0].message.content
+          assert content, "empty non-stream content"
+
+          # 3) 别名流式对话
+          r2 = c.chat.completions.create(
+              model="chat",
+              messages=[{"role": "user", "content": "hi"}],
+              stream=True,
+          )
+          got = "".join(
+              (ch.choices[0].delta.content or "") for ch in r2 if ch.choices
+          )
+          assert got, "empty streamed content"
+
+          print(f"openai-python OK: models={models} content={content!r} stream={got!r}")
+          PY
+
+  openai-node:
+    name: openai-node (Node 20)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.23.11'
+          cache: true
+          cache-dependency-path: go.mod
+      - name: Build gateway and serve in mock mode
+        run: |
+          go build -o ai-gateway-core .
+          cp config.example.yaml config.yaml
+          ./ai-gateway-core serve -mock > /tmp/gateway.log 2>&1 &
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/metrics || true)
+            [ "$code" = "200" ] && break
+            sleep 0.5
+          done
+          curl -sf -o /dev/null http://127.0.0.1:8080/metrics || { cat /tmp/gateway.log; exit 1; }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install openai
+        run: npm install --silent openai@4
+      - name: Smoke test (models / alias / non-stream / stream)
+        run: |
+          node --input-type=module - <<'JS'
+          import OpenAI from "openai";
+
+          const c = new OpenAI({
+            baseURL: "http://127.0.0.1:8080/v1",
+            apiKey: "sk-zhangsan-dev-0001",
+          });
+
+          // 1) 模型清单：应含别名 chat / cheap
+          const models = (await c.models.list()).data.map((m) => m.id);
+          if (!models.includes("chat")) throw new Error(`models missing alias: ${models}`);
+
+          // 2) 别名非流式对话
+          const r = await c.chat.completions.create({
+            model: "chat",
+            messages: [{ role: "user", content: "hi" }],
+            max_tokens: 8,
+          });
+          const content = r.choices[0].message.content;
+          if (!content) throw new Error("empty non-stream content");
+
+          // 3) 别名流式对话
+          const stream = await c.chat.completions.create({
+            model: "chat",
+            messages: [{ role: "user", content: "hi" }],
+            stream: true,
+          });
+          let got = "";
+          for await (const chunk of stream) {
+            got += chunk.choices?.[0]?.delta?.content ?? "";
+          }
+          if (!got) throw new Error("empty streamed content");
+
+          console.log(`openai-node OK: models=${models} content=${JSON.stringify(content)} stream=${JSON.stringify(got)}`);
+          JS
