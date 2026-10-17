@@ -314,7 +314,7 @@ See [docs/config-reference.md](docs/config-reference.md) for every field, type, 
 
 1. **Upstream failures still look like "success"**: normal proxied audit records lack upstream `http_status`/`success` (blocked/rejected records do include them), so an upstream 5xx is still hard to distinguish from 200 in normal records.
 2. **`routers[].domain_tags` is parsed but unused**: `domain_tag` matching actually uses request tags × upstream tags.
-3. ~~**403 blocks were not audited**~~ ✅ Fixed: requests blocked at PreRequest (401/403/429/413/502) are now audited via `kernel.EmitAbortAudit` with `http_status`/`success`/`abort_reason`.
+3. ~~**403 blocks were not audited**~~ ✅ Fixed: requests blocked at PreRequest (401/403/429/413/502) and proxy-phase errors (404 `no_route` / 502 `proxy_error` / 503 `circuit_open`) are now audited via `kernel.EmitAbortAudit` with `http_status`/`success`/`abort_reason`.
 4. **No explicit per-path plugin boundary**: industrial/edge algorithm requests currently bypass LLM plugins because injector/security skip non-JSON bodies automatically; the designed explicit `bind_paths` boundary is pending.
 5. **Baidu is the only built-in non-standard protocol adapter.**
 6. **`default_model` is metadata only** and does not participate in routing.

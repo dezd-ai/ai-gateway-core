@@ -26,7 +26,7 @@
 | 4 | 被 PreRequest 拦截的请求（401/403）不落审计 | 🟡 中 | ✅ 已修复 | 安全事件无痕，无法统计拦截量；现 `kernel.EmitAbortAudit` 为 401/403/502 拦截落一条审计（含 `http_status`/`success=false`/`abort_reason`），obs 展示拦截标记 |
 | 7 | 请求体无大小上限 | 🟡 中 | ✅ 已修复 | `transport.max_request_body_bytes` + `ReadBody` 限额 + 网关入口 Content-Length 早检，超限 413 落审计；见「内存防线」层 1 |
 | 8 | 非流式响应体全量缓冲无上限 | 🟡 中 | ✅ 已修复 | `transport.max_audit_body_bytes` 限额 `jsonAuditBody` 缓冲，超限停止缓冲（仍转发）、usage 降级 estimated；见「内存防线」层 2 |
-| 9 | 代理阶段错误（404/502/503）不落审计 | 🟡 中 | ⬜ 待修 | **端到端演练发现**（2025-08-28）：路由不匹配 `404 no route`、全上游熔断 `503`、代理错误 `502` 走 `defaultErrorHandler`，既不经过 `writeAbort` 也不经过 auditor（RoundTrip 未成功）→ 无审计记录。#4 只覆盖 PreRequest 拦截的 401/403/429/413/502。<br>**修法**（约 10 行）：`kernel/proxy.go` 的 `defaultErrorHandler` 内用 `PluginContextFromRequest(r)` 取上下文，调用现成 `EmitAbortAudit(ctx, status, code)`。 |
+| 9 | 代理阶段错误（404/502/503）不落审计 | 🟡 中 | ✅ 已修复 | 路由不匹配 `404 no_route`、代理失败 `502 proxy_error`、全上游熔断 `503 circuit_open` 现由 `kernel/proxy.go` 的 `defaultErrorHandler` 落审计（复用 `EmitAbortAudit`，含 `http_status`/`success=false`/`abort_reason`）。回归测试：`plugins/proxy_audit_test.go`。 |
 
 ---
 

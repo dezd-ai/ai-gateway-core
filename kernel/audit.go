@@ -21,9 +21,11 @@ func SetAuditStdout(enabled bool) { auditStdout.Store(enabled) }
 // AuditStdoutEnabled 返回当前是否回显审计到 stdout。
 func AuditStdoutEnabled() bool { return auditStdout.Load() }
 
-// EmitAbortAudit 为被 PreRequest 拦截（401/403/502）的请求落一条审计记录（backlog #4）。
+// EmitAbortAudit 为被拦截/拒绝的请求落一条审计记录（backlog #4 + #9）。
+// 覆盖两类来源：PreRequest 拦截（401/403/429/413/502，经 writeAbort）
+// 与代理阶段错误（404 no_route / 502 proxy_error / 503 circuit_open，经 defaultErrorHandler）。
 // 与 auditor 的正常审计记录同构，额外携带 http_status / success / abort_reason，
-// 使安全事件（越权尝试、敏感词命中、插件熔断）可统计、可追溯。
+// 使安全事件（越权尝试、敏感词命中、插件熔断、路由/上游失败）可统计、可追溯。
 func EmitAbortAudit(ctx *PluginContext, status int, reason string) {
 	storage, _ := ctx.GetValue(CtxStorage).(*EdgeStorage)
 	if storage == nil && !auditStdout.Load() {

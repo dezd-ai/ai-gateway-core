@@ -108,19 +108,32 @@ func NewReverseProxy(pipeline *Pipeline) *httputil.ReverseProxy {
 func defaultErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	status := http.StatusBadGateway
 	msg := "gateway proxy error"
+	reason := "proxy_error"
 	if err != nil {
 		msg = err.Error()
 		var nsErr *NoModelSupportError
 		switch {
-		case errors.Is(err, ErrCircuitOpen):
+		// 路由层「全部上游熔断」返回独立哨兵 errAllNodesOpen（与节点级 ErrCircuitOpen 区分），
+		// 两者对外统一为 503 circuit_open，避免全熔断时误报 502。
+		case errors.Is(err, ErrCircuitOpen), errors.Is(err, errAllNodesOpen):
 			status = http.StatusServiceUnavailable
+			reason = "circuit_open"
 		case errors.Is(err, ErrNoRoute):
 			status = http.StatusNotFound
+			reason = "no_route"
 		case errors.Is(err, ErrBodyTooLarge):
 			status = http.StatusRequestEntityTooLarge
+			reason = "body_too_large"
 		case errors.As(err, &nsErr):
 			status = http.StatusBadRequest
+			reason = "no_model_support"
 		}
+	}
+	// 代理阶段错误（404 无路由 / 502 代理失败 / 503 全上游熔断）此前既不经过
+	// writeAbort 也不经过 auditor（RoundTrip 未成功，ModifyResponse 不执行），
+	// 审计链路缺一段（backlog #9）。这里补齐：与 PreRequest 拦截共用 EmitAbortAudit。
+	if ctx := PluginContextFromRequest(r); ctx != nil {
+		EmitAbortAudit(ctx, status, reason)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

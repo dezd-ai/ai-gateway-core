@@ -32,7 +32,7 @@
 | **`stop_reason`** | string | 停止原因：`exhausted` / `timeout`（成功时为空） |
 | **`http_status`** | int | **仅拦截/拒绝记录**：401/403/429/413/502 等 |
 | **`success`** | bool | **仅拦截/拒绝记录**：恒为 `false`（正常代理记录缺省此字段） |
-| **`abort_reason`** | string | **仅拦截/拒绝记录**：如 `invalid_api_key` / `content_filter` / `model_not_allowed` / `rate_limited` / `quota_exceeded` / `key_disabled` / `busy` / `memory_hard` / `request_too_large` |
+| **`abort_reason`** | string | **仅拦截/拒绝记录**：如 `invalid_api_key` / `content_filter` / `model_not_allowed` / `rate_limited` / `quota_exceeded` / `key_disabled` / `busy` / `memory_hard` / `request_too_large`；代理阶段：`no_route` / `proxy_error` / `circuit_open` / `no_model_support` |
 
 > 两类记录：**正常代理记录**（auditor 产出）与**拦截/拒绝记录**（`kernel.EmitAbortAudit` 产出）。后者额外带 `http_status`/`success`/`abort_reason`，且 token 字段为 0、`precision` 为空。
 

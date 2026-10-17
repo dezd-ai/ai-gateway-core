@@ -4,7 +4,9 @@
 
 ## [Unreleased]
 
-（暂无。下一版本规划见 [docs/roadmap.md](docs/roadmap.md)。）
+### Fixed
+
+- **代理阶段错误落审计（backlog #9）**：404 无路由（`no_route`）、502 代理失败（`proxy_error`）、503 全上游熔断（`circuit_open`）此前既不经过 `writeAbort` 也不经过 auditor，审计链路缺一段；现由 `defaultErrorHandler` 复用 `EmitAbortAudit` 落记录。顺带修正：路由层「全部熔断」哨兵 `errAllNodesOpen` 对外统一映射为 503（此前误报 502）。回归测试：`plugins/proxy_audit_test.go`。
 
 ## [v0.1.0] - 2025-08-28（首个开源版本）
 

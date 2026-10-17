@@ -312,7 +312,7 @@ curl -s http://localhost:8080/metrics   # 并发/容量/内存水位（Prometheu
 
 1. **上游失败仍显示「成功」**：正常审计记录缺 `http_status`/`success`（**拦截/拒绝类记录已带**），上游 5xx 与 200 在正常记录里仍不易区分。完全治本需给 auditor 补上游状态字段。
 2. **`routers[].domain_tags` 未接入匹配**：当前 `domain_tag` 实际匹配用的是「用户 tags × 上游 tags」，路由声明的 `domain_tags` 仅解析未使用。
-3. ~~**403 拦截不落审计**~~ ✅ 已修复：被 PreRequest 拦截的 401/403/429/413/502 现由 `kernel.EmitAbortAudit` 落审计（含 `http_status`/`success`/`abort_reason`）。
+3. ~~**403 拦截不落审计**~~ ✅ 已修复：被 PreRequest 拦截的 401/403/429/413/502，以及代理阶段错误（404 `no_route` / 502 `proxy_error` / 503 `circuit_open`）现由 `kernel.EmitAbortAudit` 落审计（含 `http_status`/`success`/`abort_reason`）。
 4. **非 OpenAI 路径未做显式「插件路径边界」**：工业算法/端侧请求目前靠 injector/security 对非 JSON body 自动跳过，规格书规划的 `bind_paths` 显式边界待实现（见 [docs/backlog.md](docs/backlog.md) 1.7）。
 5. **百度是唯一内置的非标协议适配**。
 6. **`default_model` 是纯元数据**，不参与路由决策。
