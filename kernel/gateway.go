@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -136,6 +137,13 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if aborted, status, body := ctx.IsAborted(); aborted {
 		g.writeAbort(w, ctx, status, body, nil)
+		return
+	}
+
+	// 模型清单端点（roadmap R3 / docs/model-alias.md）：鉴权后特判，不回上游。
+	// 与 /metrics 同为直出端点，但需要 vKey 身份以按白名单过滤。
+	if r.Method == http.MethodGet && r.URL.Path == "/v1/models" {
+		g.writeModels(w, ctx, rt.cfg)
 		return
 	}
 
@@ -270,4 +278,62 @@ func (g *Gateway) CloseIdleConnections() {
 	for _, n := range rt.router.Nodes() {
 		n.Transport.CloseIdleConnections()
 	}
+}
+
+// writeModels 返回该 vKey 可用的模型清单（OpenAI 兼容 GET /v1/models）。
+// 配置了 model_aliases 时返回别名（客户端视角）；否则回退上游声明的模型并集。
+// 白名单非空时仅返回其可达条目（别名按翻译后的目标模型判定）。
+func (g *Gateway) writeModels(w http.ResponseWriter, ctx *PluginContext, cfg *config.Config) {
+	if cfg == nil {
+		return
+	}
+	var key *config.AuthKey
+	if k, ok := ctx.GetValue(CtxAuthKey).(*config.AuthKey); ok {
+		key = k
+	}
+	allowed := func(model string) bool {
+		if key == nil || len(key.ModelWhitelist) == 0 {
+			return true
+		}
+		for _, m := range key.ModelWhitelist {
+			if m == model {
+				return true
+			}
+		}
+		return false
+	}
+
+	ids := make([]string, 0, len(cfg.ModelAliases))
+	if len(cfg.ModelAliases) > 0 {
+		for alias, target := range cfg.ModelAliases {
+			if allowed(target) {
+				ids = append(ids, alias)
+			}
+		}
+	} else {
+		seen := map[string]bool{}
+		for _, u := range cfg.Upstreams {
+			for _, m := range u.Models {
+				if !seen[m] && allowed(m) {
+					seen[m] = true
+					ids = append(ids, m)
+				}
+			}
+		}
+	}
+	sort.Strings(ids)
+
+	now := time.Now().Unix()
+	data := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		data = append(data, map[string]any{
+			"id":       id,
+			"object":   "model",
+			"created":  now,
+			"owned_by": "gateway",
+		})
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-AI-Gateway-Trace-ID", ctx.GetString(CtxTraceID))
+	_ = json.NewEncoder(w).Encode(map[string]any{"object": "list", "data": data})
 }

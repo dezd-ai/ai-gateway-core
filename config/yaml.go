@@ -108,7 +108,8 @@ func (p *yparser) parseMap(indent int) (map[string]any, error) {
 		if idx < 0 {
 			return nil, fmt.Errorf("yaml: 第 %d 行缺少 key: value 分隔 %q", p.pos+1, l.text)
 		}
-		key := strings.TrimSpace(l.text[:idx])
+		// 带引号的 key（如 "chat": ...）需去引号，与标量值一致（model_aliases 依赖）
+		key := unquoteYAMLString(strings.TrimSpace(l.text[:idx]))
 		rest := strings.TrimSpace(l.text[idx+1:])
 		p.pos++
 		if rest == "" {
@@ -214,6 +215,17 @@ func findYAMLColon(s string) int {
 		}
 	}
 	return -1
+}
+
+// unquoteYAMLString 去掉成对的双引号/单引号（key 与标量值共用语义）。
+func unquoteYAMLString(s string) string {
+	if len(s) >= 2 && s[0] == '"' && s[len(s)-1] == '"' {
+		return s[1 : len(s)-1]
+	}
+	if len(s) >= 2 && s[0] == '\'' && s[len(s)-1] == '\'' {
+		return s[1 : len(s)-1]
+	}
+	return s
 }
 
 func parseYAMLScalar(s string) any {

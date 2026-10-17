@@ -330,3 +330,42 @@ routers:
 		t.Fatalf("agent 参数解析异常: %+v", cfg.Transport)
 	}
 }
+
+// TestModelAliases 验证 roadmap R3：model_aliases 解析 + Validate（目标须被上游声明）。
+func TestModelAliases(t *testing.T) {
+	base := func(aliases map[string]string) *Config {
+		return &Config{
+			Server:  Server{Port: 8080},
+			Auth:    Auth{Keys: map[string]*AuthKey{"sk-ok": {VKey: "sk-ok"}}},
+			Plugins: []Plugin{{Name: "auth_vkey", Enabled: true, Order: 1, FailStrategy: "abort"}},
+			Upstreams: []*Upstream{{
+				Name: "deepseek", BaseURL: "http://127.0.0.1:1", Protocol: "openai",
+				AuthMode: "direct", Models: []string{"deepseek-v4-flash"},
+			}},
+			Routers:      []Router{{Path: "/v1/chat/completions", Strategy: "round_robin", Upstreams: []string{"deepseek"}}},
+			Transport:    Transport{ConnectTimeoutSec: 5, TTFTTimeoutSec: 10, IdleReadTimeoutSec: 30},
+			ModelAliases: aliases,
+		}
+	}
+
+	// 解析：block 风格 map
+	m, err := ParseYAML([]byte("model_aliases:\n  \"chat\": \"deepseek-v4-flash\"\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := asMap(m["model_aliases"])
+	if got == nil || got["chat"] != "deepseek-v4-flash" {
+		t.Fatalf("model_aliases 解析失败: %v", got)
+	}
+
+	// 合法配置通过
+	c := base(map[string]string{"chat": "deepseek-v4-flash"})
+	if err := c.Validate(); err != nil {
+		t.Fatalf("合法别名不应报错: %v", err)
+	}
+	// 目标模型未被声明 → Validate 拒绝
+	c = base(map[string]string{"chat": "not-a-model"})
+	if err := c.Validate(); err == nil {
+		t.Fatal("未声明的目标模型应被 Validate 拒绝")
+	}
+}

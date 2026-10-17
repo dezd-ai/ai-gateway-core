@@ -52,6 +52,21 @@ func (p *PromptInjectorPlugin) PreRequest(ctx *kernel.PluginContext, req *http.R
 	}
 
 	model, _ := payload["model"].(string)
+
+	// 模型别名翻译（roadmap R3 / docs/model-alias.md）：逻辑名 → 真实上游模型名。
+	// 翻译放在白名单校验之前，保证白名单 / 路由 / 审计全链路看到真实名；
+	// 未命中别名原样透传（向后兼容），agent 流量同样保留翻译（翻译不是换模型）。
+	if cfg != nil && model != "" {
+		if real, ok := cfg.ModelAliases[model]; ok && real != "" && real != model {
+			ctx.Set(kernel.CtxModelAlias, model)
+			model = real
+			payload["model"] = real
+			if nb, err := json.Marshal(payload); err == nil {
+				req.Body = io.NopCloser(bytes.NewReader(nb))
+				req.ContentLength = int64(len(nb))
+			}
+		}
+	}
 	ctx.Set(kernel.CtxModel, model)
 
 	original := extractPromptText(payload["messages"])

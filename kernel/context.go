@@ -35,6 +35,7 @@ const (
 	CtxChainTruncated  = PrefixGW + "chain_truncated" // bool，max_attempts 截断（还有候选未尝试）
 	CtxRateLimiter     = PrefixGW + "rate_limiter"    // *RateLimiter，vKey 级 QPS 限流
 	CtxQuota           = PrefixGW + "quota"           // *QuotaTracker，vKey 级每日 token 配额
+	CtxModelAlias      = PrefixGW + "model_alias"     // string，客户端传入的别名（翻译前），审计用
 )
 
 // PluginContext 是单个 HTTP 请求生命周期的线程安全 Scratchpad。

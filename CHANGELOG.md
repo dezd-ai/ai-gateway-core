@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **模型别名 + `/v1/models`（roadmap R3）**：`model_aliases` 配置把逻辑名翻译为真实上游模型名（injector 阶段、白名单校验前，请求体 model 同步改写）；新增 OpenAI 兼容 `GET /v1/models`（按 vKey 白名单过滤别名，未配置别名时回退上游模型并集）。文档：[model-alias.md](docs/model-alias.md) / [config-reference](docs/config-reference.md) / [api](docs/api.md)。
+
 ### Fixed
 
 - **代理阶段错误落审计（backlog #9）**：404 无路由（`no_route`）、502 代理失败（`proxy_error`）、503 全上游熔断（`circuit_open`）此前既不经过 `writeAbort` 也不经过 auditor，审计链路缺一段；现由 `defaultErrorHandler` 复用 `EmitAbortAudit` 落记录。顺带修正：路由层「全部熔断」哨兵 `errAllNodesOpen` 对外统一映射为 503（此前误报 502）。回归测试：`plugins/proxy_audit_test.go`。

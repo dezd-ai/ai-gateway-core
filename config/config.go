@@ -12,18 +12,19 @@ import (
 
 // Config 是网关的完整声明式运行时快照（GitOps 单一事实来源）。
 type Config struct {
-	Server      Server
-	Log         Log
-	Auth        Auth
-	Plugins     []Plugin
-	Upstreams   []*Upstream
-	Routers     []Router
-	Security    Security
-	Injector    Injector
-	Transport   Transport
-	EdgeStorage EdgeStorage
-	Watchdog    Watchdog
-	Capacity    Capacity
+	Server       Server
+	Log          Log
+	Auth         Auth
+	Plugins      []Plugin
+	Upstreams    []*Upstream
+	Routers      []Router
+	Security     Security
+	Injector     Injector
+	Transport    Transport
+	EdgeStorage  EdgeStorage
+	Watchdog     Watchdog
+	Capacity     Capacity
+	ModelAliases map[string]string // 模型别名：逻辑名 → 真实上游模型名（docs/model-alias.md）
 }
 
 type Server struct {
@@ -417,6 +418,16 @@ func buildConfig(root map[string]any) *Config {
 		cfg.Capacity.HysteresisSamples = getInt(m, "hysteresis_samples", 0)
 	}
 
+	// 模型别名（roadmap R3 / docs/model-alias.md）：逻辑名 → 真实上游模型名
+	if m := asMap(root["model_aliases"]); m != nil {
+		cfg.ModelAliases = map[string]string{}
+		for alias, v := range m {
+			if target, ok := v.(string); ok && target != "" {
+				cfg.ModelAliases[alias] = target
+			}
+		}
+	}
+
 	return cfg
 }
 
@@ -507,6 +518,33 @@ func (c *Config) Validate() error {
 					return fmt.Errorf("router %s 的 fallback.model_map 目标模型 %s 不在 upstream %s 的 models 中",
 						r.Path, mm.To.Model, mm.To.Upstream)
 				}
+			}
+		}
+	}
+
+	// 模型别名（roadmap R3 / docs/model-alias.md）：目标模型必须被某个 upstream 声明；
+	// 存在未声明 models 的上游（视为不限）时放行，由运行期模型过滤兜底。
+	if len(c.ModelAliases) > 0 {
+		declared := map[string]bool{}
+		unrestricted := false
+		for _, u := range c.Upstreams {
+			if len(u.Models) == 0 {
+				unrestricted = true
+				continue
+			}
+			for _, m := range u.Models {
+				declared[m] = true
+			}
+		}
+		for alias, target := range c.ModelAliases {
+			if alias == "" {
+				return fmt.Errorf("model_aliases 存在空别名")
+			}
+			if target == "" {
+				return fmt.Errorf("model_aliases[%s] 目标模型为空", alias)
+			}
+			if !unrestricted && !declared[target] {
+				return fmt.Errorf("model_aliases[%s] 的目标模型 %s 未被任何 upstream 声明", alias, target)
 			}
 		}
 	}

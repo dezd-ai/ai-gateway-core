@@ -222,6 +222,12 @@ transport:
   # agent_max_request_body_bytes: 0     # agent 请求体上限，0=沿用全局（非"不限"）
   # agent_gateway_meta: false           # agent 是否注入 gateway_meta（默认 false = 不注入，严格解析器兼容）
 
+# 模型别名（roadmap R3 / docs/model-alias.md）：客户端传逻辑名，网关翻译为真实上游模型名。
+# 未配置时原样透传；/v1/models 在配置别名后返回别名列表（按 vKey 白名单过滤）。
+model_aliases:
+  "chat": "deepseek-v4-flash"
+  "cheap": "qwen-turbo"
+
 edge_storage:
   enabled: true
   max_disk_mb: 512

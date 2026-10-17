@@ -47,6 +47,26 @@ OpenAI 兼容 `POST /v1/chat/completions`：
 
 ---
 
+### 1.4 GET /v1/models（模型清单）
+
+需要 vKey 鉴权（`Authorization: Bearer <vKey>`），返回该 key 可用的模型清单（OpenAI 兼容 `list` 格式）。
+
+```bash
+curl -H "Authorization: Bearer sk-xxx" http://localhost:8080/v1/models
+```
+
+```json
+{"object":"list","data":[{"id":"chat","object":"model","created":1792248725,"owned_by":"gateway"}]}
+```
+
+- 配置了 `model_aliases` 时返回**别名**（客户端视角），按该 vKey 白名单过滤（按翻译后的真实名判定）；
+- 未配置别名时返回上游声明的模型并集（白名单为空则全部）；
+- 无/错 vKey → 401（与其它接口一致）；该端点不落审计（无 token 消耗）。
+
+> 模型别名翻译：客户端 `{"model":"chat"}` 在网关内部翻译为真实模型名后再路由；响应体 `model` 字段保持上游真实名（不回写别名）。
+
+---
+
 ## 2. 响应头
 
 所有经网关代理的响应（含被拦截响应）附加：

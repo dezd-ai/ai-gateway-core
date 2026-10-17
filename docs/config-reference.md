@@ -19,6 +19,7 @@ injector:      # 部门提示词模板
 transport:     # 超时与连接池
 edge_storage:  # 边缘落盘
 watchdog:      # 看门狗
+model_aliases: # 模型别名（逻辑名 → 真实上游模型名，R3）
 ```
 
 ---
@@ -267,6 +268,23 @@ edge_storage:
 | `hysteresis_samples` | int | `0`（自动 3） | 连续 N 次采样超阈值才触发/恢复（防抖动） |
 
 > 平台说明：cgroup（容器）或 /proc（Linux 裸机）可读时水位熔断生效；darwin/windows 无法读内存 → 水位禁用、仅并发准入生效。指标端点 `GET /metrics` 输出 in-flight / 上限 / 软硬模式。
+
+---
+
+## 12.6 model_aliases — 模型别名
+
+> roadmap R3 / [model-alias.md](./model-alias.md)：客户端传**逻辑名**，网关在 injector 阶段翻译为**真实上游模型名**（改写请求体 `model` 与 `CtxModel`）。
+> 翻译发生在白名单校验之前，因此**白名单写真实名**（唯一真相源）；未命中别名原样透传（向后兼容）。
+
+```yaml
+model_aliases:
+  "chat": "deepseek-v4-flash"   # 客户端 {"model":"chat"} → 上游收到 deepseek-v4-flash
+  "cheap": "qwen-turbo"
+```
+
+**静态审计**：目标模型必须被某个 upstream 的 `models` 声明（存在未声明 `models` 的上游时放行，由运行期模型过滤兜底）；别名/目标为空 → 拒绝启动。
+
+**`/v1/models`**：配置别名后返回别名列表（按 vKey 白名单过滤，白名单按真实名判定）；未配置别名时回退上游声明的模型并集。
 
 ---
 

@@ -24,6 +24,7 @@
 | 治理能力 | ✅ **vKey 生命周期**（keygen 生成 / `disabled` 吊销 / QPS 限流 / 每日 token 配额）+ **拦截请求落审计** |
 | 内存防线 | ✅ 五层：请求体上限 / 响应缓冲上限 / 并发准入(429) / 内存水位熔断 / `/metrics` + 启动日志 |
 | Agent 友好 | ✅ **Agent 宽松模式**：治理保留（审计/配额/安全），干预为零（不换模型、不注入、不掐超时） |
+| 模型别名 | ✅ 逻辑名 → 真实上游模型名翻译（injector 阶段，白名单校验真实名）+ OpenAI 兼容 `GET /v1/models`（按 vKey 过滤） |
 | 成本优化 | ✅ `cost` 策略、**内容路由**（简单→便宜档，复杂→推理档）、Prompt Cache 命中计量 |
 | 诊断与工具 | ✅ `check`（诊断）+ `bench`（压测）+ `keygen`（密钥生成）三个子命令 |
 | 观测看板 | ✅ 本仓库 `obs/` 子目录（只读网页，见 `obs/README.zh.md`） |
@@ -328,7 +329,7 @@ curl -s http://localhost:8080/metrics   # 并发/容量/内存水位（Prometheu
 
 | 版本 | 规划内容 |
 |---|---|
-| v0.2 | 模型别名 + `/v1/models`（[model-alias.md](docs/model-alias.md)）；端侧 `algorithm` 显式分发；`domain_tags` 路由接入匹配 |
+| v0.2 | 端侧 `algorithm` 显式分发；`domain_tags` 路由接入匹配 |
 | v0.3 | 时间路由（峰谷价）、`max_tokens` 上限、obs 容量卡片与失败率视图；更多非标协议适配 |
 | v0.4 | Wasm 插件市场动态挂载（`RegisterDynamicPlugin` 落地）；显式 `bind_paths` 插件边界；PII 规则引擎 |
 | v0.5 | MCP 兼容、多租户计费看板、agent 安全边界；生产硬化（TLS、多实例状态共享评估） |

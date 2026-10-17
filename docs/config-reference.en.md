@@ -21,6 +21,7 @@ injector:      # department prompt templates
 transport:     # timeouts and connection pool
 edge_storage:  # edge disk persistence
 watchdog:      # watchdog
+model_aliases: # model aliases (logical name → real upstream model, R3)
 ```
 
 ---
@@ -269,6 +270,23 @@ edge_storage:
 | `hysteresis_samples` | int | `0` (automatic 3) | N consecutive samples above the threshold are required to trigger/recover (anti-flapping) |
 
 > Platform notes: the watermark circuit breaker takes effect when cgroup (containers) or /proc (bare-metal Linux) is readable; darwin/windows cannot read memory → watermarks are disabled and only concurrency admission takes effect. The metrics endpoint `GET /metrics` outputs in-flight / limit / soft and hard modes.
+
+---
+
+## 12.6 model_aliases — model aliases
+
+> roadmap R3 / [model-alias.md](./model-alias.md): clients send a **logical name**; the gateway translates it to the **real upstream model name** during the injector stage (rewrites request body `model` and `CtxModel`).
+> Translation happens before whitelist validation, so **whitelists hold real names** (single source of truth); unmatched aliases pass through unchanged (backward compatible).
+
+```yaml
+model_aliases:
+  "chat": "deepseek-v4-flash"   # client {"model":"chat"} → upstream receives deepseek-v4-flash
+  "cheap": "qwen-turbo"
+```
+
+**Static audit**: each target model must be declared by some upstream `models` (allowed when an upstream declares no `models`, runtime model filtering still applies); empty alias/target rejects startup.
+
+**`/v1/models`**: with aliases configured, returns the alias list (filtered by vKey whitelist, matched on real names); without aliases, falls back to the union of upstream-declared models.
 
 ---
 

@@ -24,6 +24,7 @@ Follows the long-term strategy of *"Open Core open-sourced, advanced plugins com
 | Governance | ✅ **vKey lifecycle** (keygen / `disabled` revocation / QPS rate limit / daily token quota) + **audit for blocked requests** |
 | Memory guards | ✅ Five layers: request body cap / response buffer cap / in-flight admission (429) / memory watermark breaker / `/metrics` + startup log |
 | Agent-friendly | ✅ **Agent permissive mode**: governance kept (audit/quota/security), zero intervention (no model swap, no injection, no timeout kill) |
+| Model aliasing | ✅ Logical name → real upstream model translation (injector stage, whitelist validates real names) + OpenAI-compatible `GET /v1/models` (per-vKey filtered) |
 | Cost optimization | ✅ `cost` strategy, **content-aware routing** (simple → cheap tier, complex → reasoning tier), prompt-cache accounting |
 | Tooling | ✅ `check` (diagnostics) + `bench` (load test) + `keygen` (key generation) |
 | Observability | ✅ `obs/` read-only dashboard (see `obs/README.md`) |
@@ -330,7 +331,7 @@ See [docs/config-reference.md](docs/config-reference.md) for every field, type, 
 
 | Version | Planned |
 |---|---|
-| v0.2 | Model aliases + `/v1/models` ([design](docs/model-alias.md)); edge `algorithm` dispatch; `domain_tags` routing |
+| v0.2 | Edge `algorithm` dispatch; `domain_tags` routing wired into matching |
 | v0.3 | Time-based (peak/off-peak) routing; `max_tokens` cap; obs capacity card & failure-rate view; more protocol adapters |
 | v0.4 | Wasm plugin market (`RegisterDynamicPlugin`); explicit `bind_paths` boundary; PII rule engine |
 | v0.5 | MCP compatibility; multi-tenant billing dashboard; agent security boundary; production hardening (TLS, multi-instance state) |

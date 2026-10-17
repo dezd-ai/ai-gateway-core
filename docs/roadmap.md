@@ -43,7 +43,7 @@
 |---|---|---|---|
 | R1 | vKey 生命周期（keygen / 过期 / 吊销）+ 限流 + 配额/日预算 | ❌ vKey 明文无管理（README 已知限制 7）；**设计要点见 [backlog.md](./backlog.md) 1.6**（keygen 可查可作废 + 审计兜底、限流额度跨 reload/重启保留、多实例近似） | new-api 火的核心；补最大短板 |
 | R2 | **请求级失败 fallback/重试**：选中节点失败 → 自动切另一上游（或降级模型档位） | ⚠️ 仅有断路器级切换（**本次请求失败不重试**，直接 502/503）；**设计已定稿 → [fallback-design.md](./fallback-design.md)，当前优先实现** | LiteLLM 核心卖点；消除"一次 502 毁一个请求" |
-| R3 | 模型别名映射 + `/v1/models` 动态端点 + OpenAI SDK 开箱兼容 | ❌ 仅标准路径转发；**设计稿 → [model-alias.md](./model-alias.md)**（别名翻译 + /v1/models + 白名单校验真实名） | 用户零改代码迁移（openai-python 直连）；开源入场券 |
+| R3 | 模型别名映射 + `/v1/models` 动态端点 + OpenAI SDK 开箱兼容 | ✅ **已实现**（[model-alias.md](./model-alias.md)）：injector 内别名翻译（白名单校验真实名）+ GET `/v1/models` 按 vKey 白名单过滤 | 用户零改代码迁移（openai-python 直连）；开源入场券 |
 | R4 | 协议广度：智谱 / 豆包 / 月之暗面 / 讯飞 + 本地 Ollama / vLLM | ⚠️ 仅 openai + baidu_wenxin | 国内"全家桶"预期（new-api 靠此赢） |
 | R5 | 多租户用量/成本/配额看板（obs 从只读升级为运营面板） | ⚠️ obs 只读日志，无配额/告警 | 从"工具"变"产品"的分水岭 |
 | R6 | 语义缓存（请求级缓存命中）+ 缓存命中报告 | ❌ | "省钱"是最易传播的卖点；结合已有官方计费精度 = 成本报告故事 |

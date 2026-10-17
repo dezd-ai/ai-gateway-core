@@ -48,6 +48,26 @@ OpenAI-compatible `POST /v1/chat/completions`:
 
 ---
 
+### 1.4 GET /v1/models (model list)
+
+Requires vKey auth (`Authorization: Bearer <vKey>`); returns the models available to that key in OpenAI-compatible `list` format.
+
+```bash
+curl -H "Authorization: Bearer sk-xxx" http://localhost:8080/v1/models
+```
+
+```json
+{"object":"list","data":[{"id":"chat","object":"model","created":1792248725,"owned_by":"gateway"}]}
+```
+
+- With `model_aliases` configured, returns **aliases** (client view), filtered by the key's whitelist (matched on translated real names);
+- Without aliases, returns the union of upstream-declared models (all when the whitelist is empty);
+- Missing/invalid vKey → 401 (consistent with other endpoints); this endpoint is not audited (no token consumption).
+
+> Model alias translation: client `{"model":"chat"}` is translated to the real model name inside the gateway before routing; the response `model` field keeps the upstream real name (no alias echo).
+
+---
+
 ## 2. Response Headers
 
 All responses proxied through the gateway (including blocked responses) are augmented with:
