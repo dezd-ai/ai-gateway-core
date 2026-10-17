@@ -77,6 +77,6 @@ gh api repos/dezd-ai/ai-gateway-core/private-vulnerability-reporting
 | # | 项 | 说明 |
 |---|---|---|
 | 6.1 | 技术拆解文章 | 零拷贝流式审计 / 国产计费精度覆盖 / fallback 设计 |
-| 6.2 | SDK 兼容性 CI | 用 openai-python / openai-node 直连网关跑通（最易验证的信任点） |
+| 6.2 | SDK 兼容性 CI | ✅ 已落地：`.github/workflows/sdk-compat.yml`（openai-python / openai-node 直连网关，覆盖 /v1/models + 别名 + 流式/非流式） |
 | 6.3 | 发布节奏 | 2-4 周一个版本，CHANGELOG 同步 |
 | 6.4 | 预置模板 | DeepSeek / Qwen 一键 `docker compose up` |

@@ -3,6 +3,7 @@
 **English** | [中文](README.zh.md)
 
 [![CI](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/ci.yml/badge.svg)](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/ci.yml)
+[![SDK compat](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/sdk-compat.yml/badge.svg)](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/sdk-compat.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.23-00ADD8.svg)](go.mod)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](go.mod)
