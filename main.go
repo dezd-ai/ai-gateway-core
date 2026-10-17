@@ -50,11 +50,21 @@ func runServe(args []string) {
 	mockMode := fs.Bool("mock", false, "将上游重定向到内置 Mock 流式服务，便于无真实密钥闭环验证")
 	_ = fs.Parse(args)
 
+	// 容器/首次运行体验：默认 config.yaml 不存在时回退到随仓库发布的 config.example.yaml。
+	// 仅对默认路径生效（显式 -config 指定的路径不存在时仍然报错，避免掩盖配置错误）。
+	resolvedCfg := *configPath
+	if _, statErr := os.Stat(resolvedCfg); statErr != nil && resolvedCfg == "config.yaml" {
+		if _, err2 := os.Stat("config.example.yaml"); err2 == nil {
+			resolvedCfg = "config.example.yaml"
+			fmt.Println("[WARN] 未找到 config.yaml，回退使用 config.example.yaml（示例配置：上游密钥需通过环境变量或挂载真实配置提供）")
+		}
+	}
+
 	var g *kernel.Gateway
 	var err error
 	if *mockMode {
 		var cfg *config.Config
-		cfg, err = config.Load(*configPath)
+		cfg, err = config.Load(resolvedCfg)
 		if err == nil {
 			mock := mockup.NewLLMServer()
 			defer mock.Close()
@@ -65,10 +75,10 @@ func runServe(args []string) {
 				u.AuthMode = "direct"
 				u.APIKey = "mock-key"
 			}
-			g, err = kernel.NewGatewayFromConfig(cfg, *configPath)
+			g, err = kernel.NewGatewayFromConfig(cfg, resolvedCfg)
 		}
 	} else {
-		g, err = kernel.NewGateway(*configPath)
+		g, err = kernel.NewGateway(resolvedCfg)
 	}
 	if err != nil {
 		fmt.Printf("[FATAL] 网关启动失败: %v\n", err)
@@ -98,7 +108,7 @@ func runServe(args []string) {
 	fmt.Printf("  监听地址   : http://%s\n", addr)
 	fmt.Printf("  日志路径   : %s\n", kernel.ResolveLogPath(g.Config().Log))
 	fmt.Printf("  容量       : %s\n", capacityLine(g.MemStats()))
-	fmt.Println("  热加载     : 已启用（后台监听 config.yaml 变动，无中断刷新）")
+	fmt.Printf("  热加载     : 已启用（后台监听 %s 变动，无中断刷新）\n", resolvedCfg)
 	fmt.Println("================================================================")
 
 	sig := make(chan os.Signal, 1)

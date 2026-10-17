@@ -6,7 +6,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      # 只读挂载配置；宿主机改动后网关自动热加载，无需重启容器
+      # 只读挂载配置；宿主机改动后网关自动热加载，无需重启容器。
+      # 首次使用前请先 `cp config.example.yaml config.yaml`（缺省时容器会退化为示例配置）。
       - ./config.yaml:/app/config.yaml:ro
       # 审计日志持久化，防止容器重建丢失 uba.json
       - ./logs:/app/logs
@@ -15,4 +16,12 @@ services:
       - QWEN_API_KEY=${QWEN_API_KEY:-}
       - BAIDU_API_KEY=${BAIDU_API_KEY:-}
       - BAIDU_SECRET_KEY=${BAIDU_SECRET_KEY:-}
+    # 镜像内含 wget；/metrics 为公开端点（返回 200 即健康）。
+    # 注意：网关未提供 /healthz，不要用该路径做探针。
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/metrics"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped

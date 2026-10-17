@@ -48,9 +48,12 @@ export BAIDU_SECRET_KEY=xxxx
 
 ## 2. Docker 部署
 
-仓库提供多阶段构建 `Dockerfile`（静态链接、无 CGO）：
+仓库提供多阶段构建 `Dockerfile`（静态链接、无 CGO，产物镜像约 16MB）：
 
 ```bash
+# 首次使用：准备配置（不复制则容器回退到示例配置并打印 WARN）
+cp config.example.yaml config.yaml
+
 docker build -t ai-gateway-core .
 docker run -d --name ai-gateway \
   -p 8080:8080 \
@@ -63,7 +66,17 @@ docker run -d --name ai-gateway \
   ai-gateway-core
 ```
 
-docker-compose 方式见仓库根目录 `docker-compose.yml`：
+无密钥快速试跑（内置 Mock 上游，仅验证链路）：
+
+```bash
+docker run --rm -p 8080:8080 ai-gateway-core serve -mock
+# 另一个终端：curl -H "Authorization: Bearer sk-zhangsan-dev-0001" \
+#   -H "Content-Type: application/json" \
+#   -d '{"model":"deepseek-v4-flash","messages":[{"role":"user","content":"hi"}],"stream":true}' \
+#   http://localhost:8080/v1/chat/completions
+```
+
+docker-compose 方式见仓库根目录 `docker-compose.yml`（已内置 healthcheck，探针为公开端点 `/metrics`；网关不提供 `/healthz`）：
 
 ```bash
 docker compose up -d
