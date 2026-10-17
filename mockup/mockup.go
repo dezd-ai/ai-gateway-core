@@ -1,6 +1,7 @@
 package mockup
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,11 +9,24 @@ import (
 	"time"
 )
 
-// NewLLMServer 返回一个内存级 OpenAI 兼容流式服务：
-// 输出若干 content chunk → 带 cached_tokens 的官方 usage chunk → [DONE]。
-// 供 Doctor 干跑演练与 Bench 压测使用，避免依赖真实服务商。
+// NewLLMServer 返回一个内存级 OpenAI 兼容服务：按请求 stream 标志保真——
+// 流式（stream:true）输出若干 content chunk → 带 cached_tokens 的官方 usage chunk → [DONE]；
+// 非流式（stream:false/缺省）返回标准 chat.completion JSON。
+// 供 Doctor 干跑演练、Bench 压测与 SDK 兼容性验证使用，避免依赖真实服务商。
 func NewLLMServer() *httptest.Server {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		var req struct {
+			Stream bool `json:"stream"`
+		}
+		_ = json.Unmarshal(raw, &req)
+
+		if !req.Stream {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprintf(w, `{"id":"chatcmpl-mock","object":"chat.completion","created":%d,"model":"mock","choices":[{"index":0,"message":{"role":"assistant","content":"零拷贝与背压"},"finish_reason":"stop"}],"usage":{"prompt_tokens":42,"completion_tokens":6,"total_tokens":48,"prompt_tokens_details":{"cached_tokens":18}}}`+"\n", time.Now().Unix())
+			return
+		}
+
 		w.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")

@@ -202,7 +202,7 @@ func validModelFor(cfg *config.Config, vkey, path string) string {
 }
 
 func dryRunNormal(g *kernel.Gateway, model string) {
-	body := fmt.Sprintf(`{"model":%q,"messages":[{"role":"user","content":"解释零拷贝"}]}`, model)
+	body := fmt.Sprintf(`{"model":%q,"messages":[{"role":"user","content":"解释零拷贝"}],"stream":true}`, model)
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer sk-zhangsan-dev-0001")
