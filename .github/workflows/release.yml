@@ -1,0 +1,127 @@
+name: Release
+
+# 打 tag（v*）时自动：
+#   1) 构建多平台静态二进制 + SHA256SUMS，附加到 GitHub Release
+#   2) 构建 linux/amd64 + linux/arm64 镜像并推送 GHCR
+# 也支持 workflow_dispatch 传入既有 tag 补发（幂等，--clobber）。
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build assets for (e.g. v0.2.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  binaries:
+    name: Binaries
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: '1.23.11'
+          cache: true
+          cache-dependency-path: go.mod
+
+      - name: Build binaries
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          echo "Building ${VERSION} from ${TAG}"
+          mkdir -p dist
+          build() {
+            local goos="$1" goarch="$2" ext="${3:-}"
+            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 \
+              go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" \
+              -o "dist/ai-gateway-core_${VERSION}_${goos}_${goarch}${ext}" .
+          }
+          build linux amd64
+          build linux arm64
+          build darwin amd64
+          build darwin arm64
+          build windows amd64 .exe
+          cp config.example.yaml dist/config.example.yaml
+          (cd dist && sha256sum ai-gateway-core_* config.example.yaml > SHA256SUMS)
+          ls -lh dist
+
+      - name: Verify version injection
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          GOT="$(dist/ai-gateway-core_${VERSION}_linux_amd64 version)"
+          echo "version output: ${GOT}"
+          echo "${GOT}" | grep -q "${VERSION}" || { echo "::error::version injection failed"; exit 1; }
+
+      - name: Attach assets to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            VERSION="${TAG#v}"
+            NOTES="$(awk -v ver="v${VERSION}" '
+              $0 ~ "^## \\[" ver "\\]" { printing = 1; next }
+              printing && /^## \[/ { exit }
+              printing { print }
+            ' CHANGELOG.md)"
+            [ -n "$NOTES" ] || NOTES="See CHANGELOG.md for details."
+            gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "$TAG" --notes "$NOTES"
+          fi
+          gh release upload "$TAG" dist/* -R "$GITHUB_REPOSITORY" --clobber
+          echo "=== release assets ==="
+          gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            VERSION=${{ env.TAG }}
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ env.TAG }}
+            ghcr.io/${{ github.repository }}:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ env.TAG }}
+            org.opencontainers.image.licenses=Apache-2.0

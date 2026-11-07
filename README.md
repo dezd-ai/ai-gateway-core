@@ -1,9 +1,10 @@
-# AI-Gateway-Core v0.1
+# AI-Gateway-Core v0.2
 
 **English** | [中文](README.zh.md)
 
 [![CI](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/ci.yml/badge.svg)](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/ci.yml)
 [![SDK compat](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/sdk-compat.yml/badge.svg)](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/sdk-compat.yml)
+[![Release](https://img.shields.io/github/v/release/dezd-ai/ai-gateway-core?label=release)](https://github.com/dezd-ai/ai-gateway-core/releases)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.23-00ADD8.svg)](go.mod)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](go.mod)
@@ -207,6 +208,16 @@ path match → circuit-breaker filter → model filter (hard constraint) → str
 ---
 
 ## Quick start
+
+### 0. Fastest: use a released image or binary
+
+```bash
+# Docker (multi-arch, no local build needed)
+docker run --rm -p 8080:8080 ghcr.io/dezd-ai/ai-gateway-core:v0.2.0 serve -mock
+
+# Or download a prebuilt static binary (linux / macOS / windows, amd64 + arm64)
+# → https://github.com/dezd-ai/ai-gateway-core/releases
+```
 
 ### 1. Build
 

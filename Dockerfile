@@ -4,6 +4,9 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /src
 
+# 版本号注入（CI 发布镜像时传入 tag，本地构建默认 dev）
+ARG VERSION=dev
+
 # 零外部依赖：仅需 go.mod，无 go.sum
 COPY go.mod ./
 COPY config/ ./config/
@@ -16,7 +19,7 @@ COPY mockup/ ./mockup/
 COPY main.go keygen.go ./
 
 # 静态链接（CGO_ENABLED=0）+ 裁剪符号，产物为单文件二进制
-RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/ai-gateway-core .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/ai-gateway-core .
 
 FROM alpine:3.20
 

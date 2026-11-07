@@ -66,6 +66,12 @@ docker run -d --name ai-gateway \
   ai-gateway-core
 ```
 
+也可以直接用发布的镜像（多架构 amd64 + arm64，无需本地构建）：
+
+```bash
+docker run --rm -p 8080:8080 ghcr.io/dezd-ai/ai-gateway-core:v0.2.0 serve -mock
+```
+
 无密钥快速试跑（内置 Mock 上游，仅验证链路）：
 
 ```bash

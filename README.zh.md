@@ -1,9 +1,10 @@
-# AI-Gateway-Core v0.1
+# AI-Gateway-Core v0.2
 
 [English](README.md) | **中文**
 
 [![CI](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/ci.yml/badge.svg)](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/ci.yml)
 [![SDK 兼容](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/sdk-compat.yml/badge.svg)](https://github.com/dezd-ai/ai-gateway-core/actions/workflows/sdk-compat.yml)
+[![Release](https://img.shields.io/github/v/release/dezd-ai/ai-gateway-core?label=release)](https://github.com/dezd-ai/ai-gateway-core/releases)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.23-00ADD8.svg)](go.mod)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](go.mod)
@@ -208,6 +209,16 @@ type Plugin interface {
 ---
 
 ## 快速开始
+
+### 0. 最快方式：直接用发布镜像或二进制
+
+```bash
+# Docker（多架构，无需本地构建）
+docker run --rm -p 8080:8080 ghcr.io/dezd-ai/ai-gateway-core:v0.2.0 serve -mock
+
+# 或下载预编译静态二进制（linux / macOS / windows，amd64 + arm64）
+# → https://github.com/dezd-ai/ai-gateway-core/releases
+```
 
 ### 1. 构建
 
