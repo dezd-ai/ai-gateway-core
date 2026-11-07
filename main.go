@@ -104,7 +104,7 @@ func runServe(args []string) {
 	}
 
 	fmt.Println("================================================================")
-	fmt.Println("  AI-Gateway-Core v0.1 已启动")
+	fmt.Printf("  AI-Gateway-Core %s 已启动\n", version)
 	fmt.Printf("  监听地址   : http://%s\n", addr)
 	fmt.Printf("  日志路径   : %s\n", kernel.ResolveLogPath(g.Config().Log))
 	fmt.Printf("  容量       : %s\n", capacityLine(g.MemStats()))

@@ -131,6 +131,10 @@ cd obs && go build -o bin/ai-gateway-obs . && ./bin/ai-gateway-obs -log ../examp
 # 浏览器打开 http://localhost:9090
 ```
 
+15 秒终端演示（构建 → `serve -mock` → `/v1/models` → 模型别名流式对话）：
+
+![终端演示](docs/images/demo.gif)
+
 ![观测台看板](docs/images/dashboard.png)
 
 点击表格任意一行可查看**调用链时间线**（按插件执行顺序展示每步做了什么、产出了什么数据）：

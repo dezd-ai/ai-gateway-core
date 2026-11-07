@@ -9,6 +9,7 @@
 | `dashboard.png` | 观测台看板总览（汇总卡 + 成本图 + 审计表，含拦截 / failover / agent 标记） | `README.md`、`README.en.md` 的「演示」小节 |
 | `dashboard-chain.png` | 调用链详情弹窗（插件执行时间线） | 同上 |
 | `social-preview.png` | 社交分享卡片（1280×640：标题 + 实测数据 + 看板缩略图） | GitHub 仓库 Settings → Social preview（网页上传，仅 UI 可用） |
+| `demo.gif` | 15 秒终端演示（构建 → serve -mock → /v1/models → 别名流式对话） | `README.md` / `README.zh.md` 的「演示」小节 |
 
 ## 采集方式（无需运行网关，用仓库内示例数据）
 

@@ -130,6 +130,10 @@ cd obs && go build -o bin/ai-gateway-obs . && ./bin/ai-gateway-obs -log ../examp
 # open http://localhost:9090
 ```
 
+A 15-second terminal demo (build → `serve -mock` → `/v1/models` → streaming chat via model alias):
+
+![Terminal demo](docs/images/demo.gif)
+
 ![Dashboard](docs/images/dashboard.png)
 
 Click any table row to open the **call-chain timeline** (plugin execution order, with what each step did and produced):
